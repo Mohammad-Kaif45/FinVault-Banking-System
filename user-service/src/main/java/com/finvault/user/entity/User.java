@@ -1,4 +1,4 @@
-package com.finvault.user.entity; // This matches your screenshot
+package com.finvault.user.entity;
 
 import jakarta.persistence.*;
 
