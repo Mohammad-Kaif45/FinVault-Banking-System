@@ -6,11 +6,15 @@ import com.finvault.user.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.userdetails.UserDetails;
+import com.finvault.user.config.CustomUserDetailsService;
 import java.util.List;
 
 @Service
 public class UserService {
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
 
     @Autowired
     private UserRepository userRepository;
@@ -34,6 +38,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+
     public User getUser(Long id) {
         return userRepository.findById(id).orElse(null);
     }
@@ -41,4 +46,16 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+    public String validateToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (jwtUtil.validateToken(token, userDetails)) {
+            return "Token is Valid";
+        } else {
+            throw new RuntimeException("Invalid Token");
+        }
+    }
+
+
 }

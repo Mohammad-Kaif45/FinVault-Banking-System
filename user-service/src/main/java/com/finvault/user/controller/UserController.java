@@ -16,7 +16,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private AuthenticationManager authenticationManager; // This was missing!
+    private AuthenticationManager authenticationManager;
 
     // POST: Create User (Register)
     // URL: http://localhost:8081/users/register
@@ -41,5 +41,18 @@ public class UserController {
         } else {
             throw new RuntimeException("Invalid Access");
         }
+    }
+    // GET: User Profile (Secured)
+    // URL: http://localhost:8081/users/profile
+    @GetMapping("/profile")
+    public String getUserProfile() {
+        return "Welcome to your secure profile! If you see this, your Token is valid.";
+    }
+
+    // GET: Validate Token
+    // URL: http://localhost:8081/users/validate?token=eyJhb...
+    @GetMapping("/validate")
+    public String validateToken(@RequestParam("token") String token) {
+        return userService.validateToken(token);
     }
 }

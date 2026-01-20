@@ -1,5 +1,6 @@
 package com.finvault.user.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,10 +13,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter; // Inject our new filter
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -25,14 +30,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // 1. Disable CSRF (Critical for Postman)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 2. HERE IS THE FIX: Explicitly allow "/users/login"
                         .requestMatchers("/users/register", "/users/login", "/users/validate").permitAll()
-                        // 3. Block everything else
                         .anyRequest().authenticated()
-//                                .anyRequest().permitAll() // <--- TEMPORARY: Allow everyone
-                );
+                )
+                // THIS IS THE NEW PART: Add our filter before the standard one
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
