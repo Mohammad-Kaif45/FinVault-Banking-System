@@ -1,0 +1,23 @@
+#spring.application.name=api-gateway
+
+server:
+  port: 8080 # The standard entry port for web apps
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Route 1: User Service
+        - id: user-service
+          uri: lb://USER-SERVICE  # "lb" means Load Balancer (finds it in Eureka)
+          predicates:
+            - Path=/users/** # If URL starts with /users... send it there!
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
