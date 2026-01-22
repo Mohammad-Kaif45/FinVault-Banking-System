@@ -38,6 +38,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // DELETE USER
+    public void deleteUser(Long id) {
+        // usually checks if user exists first, but this is the simple version
+        userRepository.deleteById(id);
+    }
 
     public User getUser(Long id) {
         return userRepository.findById(id).orElse(null);

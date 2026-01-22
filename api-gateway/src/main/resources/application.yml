@@ -1,7 +1,5 @@
-#spring.application.name=api-gateway
-
 server:
-  port: 8080 # The standard entry port for web apps
+  port: 8080
 
 spring:
   application:
@@ -11,9 +9,21 @@ spring:
       routes:
         # Route 1: User Service
         - id: user-service
-          uri: lb://USER-SERVICE  # "lb" means Load Balancer (finds it in Eureka)
+          uri: lb://USER-SERVICE
           predicates:
-            - Path=/users/** # If URL starts with /users... send it there!
+            - Path=/users/**
+
+        # Route 2: Account Service (ADD THIS)
+        - id: account-service
+          uri: lb://ACCOUNT-SERVICE
+          predicates:
+            - Path=/accounts/**
+
+        # Route 3: Transaction Service (ADD THIS)
+        - id: transaction-service
+          uri: lb://TRANSACTION-SERVICE
+          predicates:
+            - Path=/transactions/**
 
 eureka:
   client:

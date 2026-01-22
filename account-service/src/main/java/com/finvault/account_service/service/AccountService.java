@@ -14,7 +14,11 @@ public class AccountService {
 
     // 1. Create a new account
     public Account createAccount(Account account) {
-        // In the future, we will check if the user exists here!
+        // 1. Auto-generate a random Account Number (UUID)
+        // If you don't do this, the database throws the "Not Null" error!
+        account.setAccountNumber(java.util.UUID.randomUUID().toString());
+
+        // 2. Save to Database
         return accountRepository.save(account);
     }
 
@@ -49,4 +53,6 @@ public class AccountService {
 
         return accountRepository.save(account);
     }
+
+
 }

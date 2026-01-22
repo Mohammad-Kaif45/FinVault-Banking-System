@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Service
 public class TransactionService {
@@ -15,24 +16,56 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private AccountClient accountClient; // This is our bridge to the other service
+    private AccountClient accountClient;
 
+    // --- 1. DEPOSIT LOGIC ---
+    public Transaction depositMoney(Long accountId, Double amount) {
+        // A. Call Account Service to update balance
+        accountClient.deposit(accountId, amount);
+
+        // B. Save Record (From = null, To = accountId)
+        Transaction transaction = new Transaction(
+                null,
+                accountId,
+                BigDecimal.valueOf(amount),
+                "DEPOSIT_SUCCESS"
+        );
+        transaction.setTimestamp(LocalDateTime.now()); // Ensure timestamp is set
+        return transactionRepository.save(transaction);
+    }
+
+    // --- 2. WITHDRAW LOGIC ---
+    public Transaction withdrawMoney(Long accountId, Double amount) {
+        // A. Call Account Service to update balance
+        accountClient.withdraw(accountId, amount);
+
+        // B. Save Record (From = accountId, To = null)
+        Transaction transaction = new Transaction(
+                accountId,
+                null,
+                BigDecimal.valueOf(amount),
+                "WITHDRAW_SUCCESS"
+        );
+        transaction.setTimestamp(LocalDateTime.now());
+        return transactionRepository.save(transaction);
+    }
+
+    // --- 3. TRANSFER LOGIC ---
     public Transaction transferMoney(Long fromAccountId, Long toAccountId, Double amount) {
-
-        // Step 1: Withdraw from Sender (Calls Account Service)
+        // A. Withdraw from Sender
         accountClient.withdraw(fromAccountId, amount);
 
-        // Step 2: Deposit to Receiver (Calls Account Service)
+        // B. Deposit to Receiver
         accountClient.deposit(toAccountId, amount);
 
-        // Step 3: Save the Transaction Record
+        // C. Save Record
         Transaction transaction = new Transaction(
                 fromAccountId,
                 toAccountId,
                 BigDecimal.valueOf(amount),
-                "SUCCESS"
+                "TRANSFER_SUCCESS"
         );
-
+        transaction.setTimestamp(LocalDateTime.now());
         return transactionRepository.save(transaction);
     }
 }

@@ -55,4 +55,12 @@ public class UserController {
     public String validateToken(@RequestParam("token") String token) {
         return userService.validateToken(token);
     }
+
+    // DELETE ENDPOINT
+    // URL: DELETE http://localhost:8080/users/{id}
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return "User deleted successfully";
+    }
 }
