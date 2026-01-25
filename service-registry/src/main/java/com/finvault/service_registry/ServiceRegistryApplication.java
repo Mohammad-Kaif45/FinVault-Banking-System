@@ -5,7 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 
-@SpringBootApplication
+@SpringBootApplication // This annotation is 3 in 1 Combo
+
 @EnableEurekaServer
 public class ServiceRegistryApplication {
 
