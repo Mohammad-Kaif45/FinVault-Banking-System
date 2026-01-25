@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-@Service
+@Service // Marks a class as holding business logic
 public class AccountService {
 
-    @Autowired
+    @Autowired // Inject dependencies (Beans) automatically
     private AccountRepository accountRepository;
 
     // 1. Create a new account
