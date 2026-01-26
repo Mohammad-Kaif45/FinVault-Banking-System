@@ -51,16 +51,3 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    urls:
-      - name: user-service
-        url: /users/v3/api-docs
-      - name: account-service
-        url: /accounts/v3/api-docs
-      - name: transaction-service
-        url: /transactions/v3/api-docs

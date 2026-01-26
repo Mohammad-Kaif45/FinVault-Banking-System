@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter; // Inject our new filter
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -32,10 +32,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+
+
+                        // --- 2. ALLOW AUTH ENDPOINTS ---
                         .requestMatchers("/users/register", "/users/login", "/users/validate").permitAll()
+
+                        // --- 3. LOCK EVERYTHING ELSE ---
                         .anyRequest().authenticated()
                 )
-                // THIS IS THE NEW PART: Add our filter before the standard one
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
