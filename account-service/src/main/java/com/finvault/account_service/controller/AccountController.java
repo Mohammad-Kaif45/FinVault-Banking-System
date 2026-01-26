@@ -15,10 +15,14 @@ public class AccountController {
 
     // POST: Create a new account
     // URL: http://localhost:8082/accounts
+
+
     @PostMapping
     public Account createAccount(@RequestBody Account account) {
         return accountService.createAccount(account);
     }
+
+
 
     // GET: Get accounts by User ID
     // URL: http://localhost:8082/accounts/user/{userId}

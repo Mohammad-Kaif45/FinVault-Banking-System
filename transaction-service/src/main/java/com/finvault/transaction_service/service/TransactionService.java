@@ -3,6 +3,7 @@ package com.finvault.transaction_service.service;
 import com.finvault.transaction_service.client.AccountClient;
 import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.repository.TransactionRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,32 +20,37 @@ public class TransactionService {
     private AccountClient accountClient;
 
     // --- 1. DEPOSIT LOGIC ---
+    @CircuitBreaker(name = "accountService", fallbackMethod = "depositFallback")
     public Transaction depositMoney(Long accountId, Double amount) {
-        // A. Call Account Service to update balance
-        accountClient.deposit(accountId, amount);
+        accountClient.deposit(accountId, amount); // This might fail!
 
-        // B. Save Record (From = null, To = accountId)
         Transaction transaction = new Transaction(
-                null,
-                accountId,
-                BigDecimal.valueOf(amount),
-                "DEPOSIT_SUCCESS"
+                null, accountId, BigDecimal.valueOf(amount), "DEPOSIT_SUCCESS"
         );
-        transaction.setTimestamp(LocalDateTime.now()); // Ensure timestamp is set
+        transaction.setTimestamp(LocalDateTime.now());
+        return transactionRepository.save(transaction);
+    }
+
+    // --- FALLBACK FOR DEPOSIT ---
+    // Must have SAME arguments as original + Throwable
+    public Transaction depositFallback(Long accountId, Double amount, Throwable t) {
+        // "Plan B": The Account Service is down.
+        // We save a FAILED transaction so the user knows what happened.
+        System.out.println("⚠️ Circuit Breaker Tripped! Reason: " + t.getMessage());
+
+        Transaction transaction = new Transaction(
+                null, accountId, BigDecimal.valueOf(amount), "FAILED_SERVICE_DOWN"
+        );
+        transaction.setTimestamp(LocalDateTime.now());
         return transactionRepository.save(transaction);
     }
 
     // --- 2. WITHDRAW LOGIC ---
+    // (You can add CircuitBreaker here too if you want, same pattern)
     public Transaction withdrawMoney(Long accountId, Double amount) {
-        // A. Call Account Service to update balance
         accountClient.withdraw(accountId, amount);
-
-        // B. Save Record (From = accountId, To = null)
         Transaction transaction = new Transaction(
-                accountId,
-                null,
-                BigDecimal.valueOf(amount),
-                "WITHDRAW_SUCCESS"
+                accountId, null, BigDecimal.valueOf(amount), "WITHDRAW_SUCCESS"
         );
         transaction.setTimestamp(LocalDateTime.now());
         return transactionRepository.save(transaction);
@@ -52,18 +58,10 @@ public class TransactionService {
 
     // --- 3. TRANSFER LOGIC ---
     public Transaction transferMoney(Long fromAccountId, Long toAccountId, Double amount) {
-        // A. Withdraw from Sender
         accountClient.withdraw(fromAccountId, amount);
-
-        // B. Deposit to Receiver
         accountClient.deposit(toAccountId, amount);
-
-        // C. Save Record
         Transaction transaction = new Transaction(
-                fromAccountId,
-                toAccountId,
-                BigDecimal.valueOf(amount),
-                "TRANSFER_SUCCESS"
+                fromAccountId, toAccountId, BigDecimal.valueOf(amount), "TRANSFER_SUCCESS"
         );
         transaction.setTimestamp(LocalDateTime.now());
         return transactionRepository.save(transaction);

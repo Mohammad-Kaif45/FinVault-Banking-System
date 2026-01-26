@@ -6,24 +6,43 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      # --- NEW: CORS CONFIGURATION STARTS HERE ---
+      globalcors:
+        cors-configurations:
+          '[/**]': # 1. Apply these rules to ALL paths
+            allowedOrigins: "http://localhost:3000" # 2. Only allow THIS website
+            allowedMethods: # 3. Allow these actions
+              - GET
+              - POST
+              - PUT
+              - DELETE
+            allowedHeaders: "*" # 4. Allow all headers (like Authorization)
+      # --- CORS CONFIGURATION ENDS HERE ---
+
       routes:
-        # Route 1: User Service
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
+          metadata:
+            response-timeout: 2000 # Wait max 2 seconds for a response
+            connect-timeout: 2000 # Wait max 2 seconds to establish connection
 
-        # Route 2: Account Service (ADD THIS)
         - id: account-service
           uri: lb://ACCOUNT-SERVICE
           predicates:
             - Path=/accounts/**
+          metadata:
+            response-timeout: 2000
+            connect-timeout: 2000
 
-        # Route 3: Transaction Service (ADD THIS)
         - id: transaction-service
           uri: lb://TRANSACTION-SERVICE
           predicates:
             - Path=/transactions/**
+          metadata:
+            response-timeout: 2000
+            connect-timeout: 2000
 
 eureka:
   client:
