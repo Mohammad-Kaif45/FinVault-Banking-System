@@ -1,0 +1,23 @@
+#spring.application.name=notification-service
+
+
+server:
+  port: 8084 # 8081=User, 8082=Account, 8083=Tx. This is the next open slot.
+
+spring:
+  application:
+    name: notification-service
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092 # Pointing to your Docker Container
+      group-id: notification-group      # This identifies our team of listeners
+      auto-offset-reset: earliest       # If we join late, read old messages first
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    topic:
+      name: transaction-updates         # The specific "Inbox" we will watch
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
