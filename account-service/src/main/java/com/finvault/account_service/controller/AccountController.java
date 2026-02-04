@@ -22,6 +22,12 @@ public class AccountController {
         return accountService.createAccount(account);
     }
 
+    // GET: Get a single account by ID
+    // URL: http://localhost:8082/accounts/{id}
+    @GetMapping("/{id}")
+    public Account getAccount(@PathVariable Long id) {
+        return accountService.getAccountById(id);
+    }
 
 
     // GET: Get accounts by User ID

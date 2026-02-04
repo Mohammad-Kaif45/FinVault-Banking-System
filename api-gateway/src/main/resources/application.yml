@@ -6,18 +6,18 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      # --- NEW: CORS CONFIGURATION STARTS HERE ---
+      # --- CORS CONFIGURATION ---
       globalcors:
         cors-configurations:
-          '[/**]': # 1. Apply these rules to ALL paths
-            allowedOrigins: "http://localhost:3000" # 2. Only allow THIS website
-            allowedMethods: # 3. Allow these actions
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
-            allowedHeaders: "*" # 4. Allow all headers (like Authorization)
-      # --- CORS CONFIGURATION ENDS HERE ---
+            allowedHeaders: "*"
+      # --- END CORS ---
 
       routes:
         - id: user-service
@@ -25,24 +25,24 @@ spring:
           predicates:
             - Path=/users/**
           metadata:
-            response-timeout: 2000 # Wait max 2 seconds for a response
-            connect-timeout: 2000 # Wait max 2 seconds to establish connection
+            response-timeout: 10000  # <--- Changed to 10 seconds
+            connect-timeout: 10000   # <--- Changed to 10 seconds
 
         - id: account-service
           uri: lb://ACCOUNT-SERVICE
           predicates:
             - Path=/accounts/**
           metadata:
-            response-timeout: 2000
-            connect-timeout: 2000
+            response-timeout: 10000  # <--- Changed to 10 seconds
+            connect-timeout: 10000   # <--- Changed to 10 seconds
 
         - id: transaction-service
           uri: lb://TRANSACTION-SERVICE
           predicates:
             - Path=/transactions/**
           metadata:
-            response-timeout: 2000
-            connect-timeout: 2000
+            response-timeout: 10000  # <--- Changed to 10 seconds
+            connect-timeout: 10000   # <--- Changed to 10 seconds
 
 eureka:
   client:
@@ -50,4 +50,3 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-
