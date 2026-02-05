@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import TransferForm from './TransferForm'; // 👈 Import the new component
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -7,27 +8,30 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // Toggle for showing the Transfer Form
+    const [showTransfer, setShowTransfer] = useState(false);
+
+    // We define this function outside useEffect so we can call it again after a transfer
+    const fetchAccountData = async () => {
+        try {
+            // 1. Get User (ID 1)
+            const userRes = await axios.get('http://localhost:8080/users/1');
+            setUser(userRes.data);
+
+            // 2. Get Account (ID 6)
+            const accountRes = await axios.get('http://localhost:8080/accounts/6');
+            setAccount(accountRes.data);
+
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching data:", err);
+            setError("Could not load data. Are services running?");
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // 1. Get User Details (User ID 1)
-                const userRes = await axios.get('http://localhost:8080/users/1');
-                setUser(userRes.data);
-
-                // 2. Get Account Details (Account ID 1)
-                // Note: Ensure Account 1 exists in your DB, otherwise change this ID
-                const accountRes = await axios.get('http://localhost:8080/accounts/6');
-                setAccount(accountRes.data);
-
-                setLoading(false);
-            } catch (err) {
-                console.error("Error fetching data:", err);
-                setError("Could not load data. Are services running?");
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        fetchAccountData();
     }, []);
 
     if (loading) return <div className="text-center mt-5">Loading Dashboard...</div>;
@@ -40,7 +44,7 @@ const Dashboard = () => {
             <div className="row">
                 {/* Profile Card */}
                 <div className="col-md-4">
-                    <div className="card shadow-sm">
+                    <div className="card shadow-sm mb-4">
                         <div className="card-body text-center">
                             <img
                                 src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
@@ -55,9 +59,10 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Account Balance Card */}
+                {/* Account Section */}
                 <div className="col-md-8">
-                    <div className="card shadow-sm bg-primary text-white">
+                    {/* Balance Card */}
+                    <div className="card shadow-sm bg-primary text-white mb-4">
                         <div className="card-body">
                             <h5 className="card-title">Savings Account</h5>
                             <h1 className="display-4 fw-bold">${account.balance}</h1>
@@ -65,15 +70,26 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    {/* Quick Actions (Placeholders) */}
-                    <div className="mt-4 d-flex gap-3">
-                        <button className="btn btn-success btn-lg flex-grow-1">
-                            💸 Transfer Money
+                    {/* Action Buttons */}
+                    <div className="d-flex gap-3 mb-4">
+                        <button
+                            className="btn btn-success btn-lg flex-grow-1"
+                            onClick={() => setShowTransfer(!showTransfer)} // 👈 Toggle Form
+                        >
+                            {showTransfer ? "❌ Close Transfer" : "💸 Transfer Money"}
                         </button>
                         <button className="btn btn-secondary btn-lg flex-grow-1">
                             📜 History
                         </button>
                     </div>
+
+                    {/* 🚀 CONDITIONAL RENDER: Show Transfer Form if button is clicked */}
+                    {showTransfer && (
+                        <TransferForm
+                            userId={user.id}
+                            refreshAccount={fetchAccountData}
+                        />
+                    )}
                 </div>
             </div>
         </div>
