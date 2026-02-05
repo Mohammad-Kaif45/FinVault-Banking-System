@@ -1,0 +1,83 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const Dashboard = () => {
+    const [user, setUser] = useState(null);
+    const [account, setAccount] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // 1. Get User Details (User ID 1)
+                const userRes = await axios.get('http://localhost:8080/users/1');
+                setUser(userRes.data);
+
+                // 2. Get Account Details (Account ID 1)
+                // Note: Ensure Account 1 exists in your DB, otherwise change this ID
+                const accountRes = await axios.get('http://localhost:8080/accounts/6');
+                setAccount(accountRes.data);
+
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                setError("Could not load data. Are services running?");
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (loading) return <div className="text-center mt-5">Loading Dashboard...</div>;
+    if (error) return <div className="alert alert-danger m-5">{error}</div>;
+
+    return (
+        <div className="container mt-5">
+            <h2 className="mb-4">👋 Welcome, {user.fullName}</h2>
+
+            <div className="row">
+                {/* Profile Card */}
+                <div className="col-md-4">
+                    <div className="card shadow-sm">
+                        <div className="card-body text-center">
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                                alt="Profile"
+                                style={{ width: '100px' }}
+                                className="mb-3"
+                            />
+                            <h4>{user.username}</h4>
+                            <p className="text-muted">{user.email}</p>
+                            <button className="btn btn-outline-primary btn-sm">Edit Profile</button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Account Balance Card */}
+                <div className="col-md-8">
+                    <div className="card shadow-sm bg-primary text-white">
+                        <div className="card-body">
+                            <h5 className="card-title">Savings Account</h5>
+                            <h1 className="display-4 fw-bold">${account.balance}</h1>
+                            <p className="mb-0">Account ID: #{account.id}</p>
+                        </div>
+                    </div>
+
+                    {/* Quick Actions (Placeholders) */}
+                    <div className="mt-4 d-flex gap-3">
+                        <button className="btn btn-success btn-lg flex-grow-1">
+                            💸 Transfer Money
+                        </button>
+                        <button className="btn btn-secondary btn-lg flex-grow-1">
+                            📜 History
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;
