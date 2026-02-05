@@ -19,19 +19,23 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String role; // "USER" or "ADMIN"
+    @Column(name = "full_name") // 👈 THIS MAPS TO YOUR NEW DB COLUMN
+    private String fullName;
 
-    // --- MANUALLY ADDED GETTERS AND SETTERS (Since we didn't add Lombok) ---
+    private String role;
 
+    // Constructors
     public User() {}
 
-    public User(String username, String password, String email, String role) {
+    public User(String username, String password, String email, String fullName, String role) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.fullName = fullName;
         this.role = role;
     }
 
+    // --- GETTERS AND SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -43,6 +47,10 @@ public class User {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    // 👇 ADD THESE TWO!
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }

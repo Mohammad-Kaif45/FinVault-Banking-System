@@ -32,12 +32,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // ALLOW registration AND fetching user details by ID
+                        .requestMatchers("/users/register", "/users/login", "/users/validate", "/users/**").permitAll()
+                        // Note: I added "/users/**" so you can fetch /users/1 without a token for now.
 
-
-                        // --- 2. ALLOW AUTH ENDPOINTS ---
-                        .requestMatchers("/users/register", "/users/login", "/users/validate").permitAll()
-
-                        // --- 3. LOCK EVERYTHING ELSE ---
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
