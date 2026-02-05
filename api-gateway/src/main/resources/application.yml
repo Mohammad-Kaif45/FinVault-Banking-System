@@ -25,26 +25,31 @@ spring:
           predicates:
             - Path=/users/**
           metadata:
-            response-timeout: 10000  # <--- Changed to 10 seconds
-            connect-timeout: 10000   # <--- Changed to 10 seconds
+            response-timeout: 10000
+            connect-timeout: 10000
 
         - id: account-service
           uri: lb://ACCOUNT-SERVICE
           predicates:
             - Path=/accounts/**
           metadata:
-            response-timeout: 10000  # <--- Changed to 10 seconds
-            connect-timeout: 10000   # <--- Changed to 10 seconds
+            response-timeout: 10000
+            connect-timeout: 10000
 
         - id: transaction-service
           uri: lb://TRANSACTION-SERVICE
           predicates:
             - Path=/transactions/**
           metadata:
-            response-timeout: 10000  # <--- Changed to 10 seconds
-            connect-timeout: 10000   # <--- Changed to 10 seconds
+            response-timeout: 10000
+            connect-timeout: 10000
 
 eureka:
+  # 👇 THIS IS THE CRITICAL FIX FOR WINDOWS 👇
+  instance:
+    prefer-ip-address: true
+  # ----------------------------------------
+
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
