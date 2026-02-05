@@ -1,5 +1,5 @@
 package com.finvault.user.service;
-
+import java.util.Optional;
 import com.finvault.user.entity.User;
 import com.finvault.user.repository.UserRepository;
 import com.finvault.user.util.JwtUtil;
@@ -42,6 +42,10 @@ public class UserService {
     public void deleteUser(Long id) {
         // usually checks if user exists first, but this is the simple version
         userRepository.deleteById(id);
+    }
+    // Inside UserService.java
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
     public User getUser(Long id) {
