@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-const TransferForm = ({ userId, refreshAccount }) => {
+// 👇 Updated props to accept fromAccountId
+const TransferForm = ({ fromAccountId, refreshAccount }) => {
     const [toAccount, setToAccount] = useState("");
     const [amount, setAmount] = useState("");
     const [message, setMessage] = useState("");
@@ -15,7 +16,7 @@ const TransferForm = ({ userId, refreshAccount }) => {
         try {
             // This is the payload we will send to the backend
             const transactionData = {
-                senderId: userId,  // From the user logged in
+                fromAccountId: fromAccountId,  // 👈 Send the actual Account ID
                 receiverAccountId: toAccount, // Who we are paying
                 amount: parseFloat(amount) // Ensure it's a number
             };
@@ -36,7 +37,8 @@ const TransferForm = ({ userId, refreshAccount }) => {
 
         } catch (err) {
             console.error("Transfer Failed:", err);
-            setError("❌ Transfer Failed. Check Account ID or Balance.");
+            // Improved error message handling
+            setError("❌ Transfer Failed: " + (err.response?.data?.message || "Check Account ID or Balance."));
         }
     };
 
@@ -54,7 +56,7 @@ const TransferForm = ({ userId, refreshAccount }) => {
                         <input
                             type="number"
                             className="form-control"
-                            placeholder="e.g. 7"
+                            placeholder="e.g. 9"
                             value={toAccount}
                             onChange={(e) => setToAccount(e.target.value)}
                             required

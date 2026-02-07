@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import TransferForm from './TransferForm'; // 👈 Import the new component
+import TransferForm from './TransferForm';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -18,8 +18,8 @@ const Dashboard = () => {
             const userRes = await axios.get('http://localhost:8080/users/1');
             setUser(userRes.data);
 
-            // 2. Get Account (ID 6)
-            const accountRes = await axios.get('http://localhost:8080/accounts/6');
+            // 2. Get Account (ID 8) - Assuming 8 is your main account now
+            const accountRes = await axios.get('http://localhost:8080/accounts/8');
             setAccount(accountRes.data);
 
             setLoading(false);
@@ -74,7 +74,7 @@ const Dashboard = () => {
                     <div className="d-flex gap-3 mb-4">
                         <button
                             className="btn btn-success btn-lg flex-grow-1"
-                            onClick={() => setShowTransfer(!showTransfer)} // 👈 Toggle Form
+                            onClick={() => setShowTransfer(!showTransfer)}
                         >
                             {showTransfer ? "❌ Close Transfer" : "💸 Transfer Money"}
                         </button>
@@ -83,10 +83,10 @@ const Dashboard = () => {
                         </button>
                     </div>
 
-                    {/* 🚀 CONDITIONAL RENDER: Show Transfer Form if button is clicked */}
+                    {/* 🚀 CONDITIONAL RENDER: Pass ACCOUNT ID, NOT USER ID */}
                     {showTransfer && (
                         <TransferForm
-                            userId={user.id}
+                            fromAccountId={account.id}
                             refreshAccount={fetchAccountData}
                         />
                     )}
