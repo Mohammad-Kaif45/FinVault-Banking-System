@@ -1,5 +1,5 @@
 server:
-  port: 8083 # Transaction Service Port
+  port: 8083
 
 spring:
   application:
@@ -13,29 +13,13 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
 
+  # Kafka Configuration
   kafka:
     producer:
       bootstrap-servers: localhost:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    properties:
-      spring.json.add.type.headers: false
-
-# --- Circuit Breaker Configuration ---
-resilience4j:
-  circuitbreaker:
-    instances:
-      accountService:
-        registerHealthIndicator: true
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
 
 eureka:
   client:
@@ -44,7 +28,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
 
-  # 👇 THIS IS THE CRITICAL FIX FOR WINDOWS 👇
+  # 👇 THIS IS THE CRITICAL NETWORK FIX 👇
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${random.value}

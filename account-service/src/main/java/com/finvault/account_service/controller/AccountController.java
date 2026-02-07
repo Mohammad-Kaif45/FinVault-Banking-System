@@ -68,33 +68,28 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    // 1. Create a new account
-    @PostMapping("/create") // Updated to be explicit
+    @PostMapping("/create")
     public Account createAccount(@RequestBody Account account) {
         return accountService.createAccount(account);
     }
 
-    // 2. Get a single account by ID
     @GetMapping("/{id}")
     public Account getAccount(@PathVariable Long id) {
         return accountService.getAccountById(id);
     }
 
-    // 3. Get accounts by User ID
     @GetMapping("/user/{userId}")
     public List<Account> getAccountsByUser(@PathVariable Long userId) {
         return accountService.getAccountsByUserId(userId);
     }
 
-    // --- 4. NEW ENDPOINTS FOR TRANSACTION SERVICE (FEIGN CLIENT) ---
+    // --- 👇 THESE MUST MATCH THE CLIENT EXACTLY 👇 ---
 
-    // The Transaction Service sends a POST request here to add money
     @PostMapping("/deposit")
     public void deposit(@RequestParam Long id, @RequestParam Double amount) {
         accountService.deposit(id, amount);
     }
 
-    // The Transaction Service sends a POST request here to remove money
     @PostMapping("/withdraw")
     public void withdraw(@RequestParam Long id, @RequestParam Double amount) {
         accountService.withdraw(id, amount);
