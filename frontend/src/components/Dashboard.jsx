@@ -19,7 +19,7 @@ const Dashboard = () => {
             setUser(userRes.data);
 
             // 2. Get Account (ID 8) - Assuming 8 is your main account now
-            const accountRes = await axios.get('http://localhost:8080/accounts/8');
+            const accountRes = await axios.get('http://localhost:8080/accounts/10');
             setAccount(accountRes.data);
 
             setLoading(false);
