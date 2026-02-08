@@ -1,15 +1,26 @@
 server:
-  port: 8084 # 8081=User, 8082=Account, 8083=Transaction
+  port: 8084
 
 spring:
   application:
     name: notification-service
+
   kafka:
     consumer:
       bootstrap-servers: localhost:9092
-      group-id: notification-group
-      auto-offset-reset: earliest
+      # 👇 CRITICAL: This MUST be different from before
+      group-id: notification-group-v3
+      # 👇 CRITICAL: This ensures we skip the old "Poison" text messages
+      auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
     properties:
       spring.json.trusted.packages: "*"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
