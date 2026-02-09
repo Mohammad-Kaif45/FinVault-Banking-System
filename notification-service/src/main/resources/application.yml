@@ -8,9 +8,9 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: localhost:9092
-      # 👇 CRITICAL: This MUST be different from before
-      group-id: notification-group-v3
-      # 👇 CRITICAL: This ensures we skip the old "Poison" text messages
+      # 👇 CRITICAL: New unique name forces a fresh start
+      group-id: finvault-notification-group-FRESH-START
+      # 👇 CRITICAL: Tells Kafka "If I am new, ignore history and start at the END"
       auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
