@@ -1,5 +1,7 @@
 package com.finvault.transaction_service.service;
+
 import com.finvault.transaction_service.client.AccountClient;
+import com.finvault.transaction_service.dto.TransactionEvent; // 👈 Make sure this import exists
 import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.repository.TransactionRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -8,7 +10,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Service
 public class TransactionService {
@@ -17,27 +18,33 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
-    private AccountClient accountClient; // Feign Client
+    private AccountClient accountClient;
 
+    // 👇 FIXED: Changed to <String, Object> so we can send JSON
     @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final String TOPIC = "transaction-updates";
 
     // --- 1. DEPOSIT LOGIC ---
     @CircuitBreaker(name = "accountService", fallbackMethod = "depositFallback")
     public Transaction depositMoney(Long accountId, Double amount) {
-        // Call Account Service via Feign
         accountClient.deposit(accountId, amount);
 
         Transaction transaction = new Transaction(
                 null, accountId, BigDecimal.valueOf(amount), "DEPOSIT_SUCCESS"
         );
-
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // Notify Kafka
-        kafkaTemplate.send(TOPIC, "Deposit of $" + amount + " to Account " + accountId);
+        // 👇 FIXED: Sending OBJECT, not String
+        TransactionEvent event = new TransactionEvent(
+                "DEPOSIT",
+                null,
+                accountId.toString(),
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
@@ -55,10 +62,17 @@ public class TransactionService {
         Transaction transaction = new Transaction(
                 accountId, null, BigDecimal.valueOf(amount), "WITHDRAW_SUCCESS"
         );
-
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        kafkaTemplate.send(TOPIC, "Withdrawal of $" + amount + " from Account " + accountId);
+        // 👇 FIXED: Sending OBJECT, not String
+        TransactionEvent event = new TransactionEvent(
+                "WITHDRAW",
+                accountId.toString(),
+                null,
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
@@ -68,27 +82,25 @@ public class TransactionService {
     }
 
     // --- 3. TRANSFER LOGIC ---
-    // Note: Since this calls two methods, it's safer to not circuit break the whole thing at once
     public Transaction transferMoney(Long fromAccountId, Long toAccountId, Double amount) {
-
-        // 1. Withdraw from Sender
         accountClient.withdraw(fromAccountId, amount);
-
-        // 2. Deposit to Receiver
         accountClient.deposit(toAccountId, amount);
 
-        // 3. Save Record
         Transaction transaction = new Transaction(
                 fromAccountId, toAccountId, BigDecimal.valueOf(amount), "TRANSFER_SUCCESS"
         );
-
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // 4. Notify Kafka
-        kafkaTemplate.send(TOPIC, "Transfer of $" + amount + " from " + fromAccountId + " to " + toAccountId);
+        // 👇 FIXED: Sending OBJECT, not String
+        TransactionEvent event = new TransactionEvent(
+                "TRANSFER",
+                fromAccountId.toString(),
+                toAccountId.toString(),
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
 }
-
-
