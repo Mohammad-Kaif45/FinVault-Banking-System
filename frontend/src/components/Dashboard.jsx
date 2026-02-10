@@ -8,7 +8,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Toggle for showing the Transfer Form
+    // Toggle for showing the Transfer Form and
     const [showTransfer, setShowTransfer] = useState(false);
 
     // We define this function outside useEffect so we can call it again after a transfer
