@@ -37,14 +37,14 @@ public class TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 👇 FIXED: Sending OBJECT, not String
-        TransactionEvent event = new TransactionEvent(
-                "DEPOSIT",
-                null,
-                accountId.toString(),
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
-        kafkaTemplate.send(TOPIC, event);
+//        TransactionEvent event = new TransactionEvent(
+//                "DEPOSIT",
+//                null,
+//                accountId.toString(),
+//                BigDecimal.valueOf(amount),
+//                "SUCCESS"
+//        );
+//        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
@@ -65,14 +65,14 @@ public class TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 👇 FIXED: Sending OBJECT, not String
-        TransactionEvent event = new TransactionEvent(
-                "WITHDRAW",
-                accountId.toString(),
-                null,
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
-        kafkaTemplate.send(TOPIC, event);
+//        TransactionEvent event = new TransactionEvent(
+//                "WITHDRAW",
+//                accountId.toString(),
+//                null,
+//                BigDecimal.valueOf(amount),
+//                "SUCCESS"
+//        );
+//        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
@@ -92,14 +92,14 @@ public class TransactionService {
         Transaction savedTransaction = transactionRepository.save(transaction);
 
         // 👇 FIXED: Sending OBJECT, not String
-        TransactionEvent event = new TransactionEvent(
-                "TRANSFER",
-                fromAccountId.toString(),
-                toAccountId.toString(),
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
-        kafkaTemplate.send(TOPIC, event);
+//        TransactionEvent event = new TransactionEvent(
+//                "TRANSFER",
+//                fromAccountId.toString(),
+//                toAccountId.toString(),
+//                BigDecimal.valueOf(amount),
+//                "SUCCESS"
+//        );
+//        kafkaTemplate.send(TOPIC, event);
 
         return savedTransaction;
     }
