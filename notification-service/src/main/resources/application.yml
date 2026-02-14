@@ -9,8 +9,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: YOUR_EMAIL@gmail.com  # 👈 REPLACE THIS
-    password: YOUR_APP_PASSWORD     # 👈 REPLACE THIS (The 16-char code)
+    username: kaifmumtajansari@gmail.com  # 👈 REPLACE THIS
+    password: accihqsipdwngasr     # 👈 REPLACE THIS (The 16-char code)
     properties:
       mail:
         smtp:
