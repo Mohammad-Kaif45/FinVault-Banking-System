@@ -36,7 +36,7 @@ public class TransactionService {
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // 👇 FIXED: Sending OBJECT, not String
+        // It is for kafka
 //        TransactionEvent event = new TransactionEvent(
 //                "DEPOSIT",
 //                null,
