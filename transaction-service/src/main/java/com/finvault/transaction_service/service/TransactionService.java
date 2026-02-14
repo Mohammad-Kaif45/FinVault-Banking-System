@@ -36,7 +36,7 @@ public class TransactionService {
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // It is for kafka
+        // It is for kafka and for now i am commenting these
 //        TransactionEvent event = new TransactionEvent(
 //                "DEPOSIT",
 //                null,
