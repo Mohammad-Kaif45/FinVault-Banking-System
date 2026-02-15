@@ -5,11 +5,11 @@ spring:
   application:
     name: notification-service
 
-  # 👇 NEW EMAIL CONFIGURATION
+  # 👇EMAIL CONFIGURATION
   mail:
     host: smtp.gmail.com
     port: 587
-    username: kaifmumtajansari@gmail.com
+    username: ${GMAIL_USERNAME}
     password: ${GMAIL_APP_PASSWORD}
     properties:
       mail:
