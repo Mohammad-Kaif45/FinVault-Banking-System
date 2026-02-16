@@ -19,19 +19,21 @@ public class JwtService {
     // This specific key is a Base64-encoded 256-bit key (required for HS256).
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
-    // 1. GENERATE TOKEN
-    public String generateToken(String userName) {
+    // 1. GENERATE TOKEN (Modified to accept Role)
+    // We will now call this with (email, role)
+    public String generateToken(String userName, String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role); // 👈 Add Role to the token data
         return createToken(claims, userName);
     }
 
-    // 2. CREATE TOKEN (Internal Helper)
+    // 2. CREATE TOKEN (No changes here, just keeping it for context)
     private String createToken(Map<String, Object> claims, String userName) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // Token valid for 30 minutes
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

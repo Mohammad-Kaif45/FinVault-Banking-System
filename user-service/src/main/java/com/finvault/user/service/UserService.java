@@ -73,9 +73,12 @@ public class UserService {
         return repository.save(user);
     }
 
-    // ✅ REAL TOKEN GENERATION
-    public String generateToken(String username) {
-        return jwtService.generateToken(username);
+    // 3. GENERATE TOKEN (Updated)
+    public String generateToken(String email) {
+        // Find the user to get their role
+        User user = repository.findByEmail(email).get();
+        // Pass both Email AND Role to the JwtService
+        return jwtService.generateToken(email, user.getRole());
     }
 
     // ✅ REAL TOKEN VALIDATION
