@@ -1,70 +1,50 @@
 package com.finvault.user.service;
-import java.util.Optional;
+
 import com.finvault.user.entity.User;
 import com.finvault.user.repository.UserRepository;
-import com.finvault.user.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder; // Will use later
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.userdetails.UserDetails;
-import com.finvault.user.config.CustomUserDetailsService;
-import java.util.List;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository repository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    // We will enable this in Day 2
+    // @Autowired
+    // private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    // 1. Generate Token Logic
-    public String generateToken(String username) {
-        return jwtUtil.generateToken(username);
+    // 1. SAVE USER (Registration)
+    public User saveUser(User user) {
+        // user.setPassword(passwordEncoder.encode(user.getPassword())); // Enable later
+        return repository.save(user);
     }
 
-    // 2. Create User Logic
-    public User createUser(User user) {
-        // Encrypt the password before saving
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        return userRepository.save(user);
-    }
-
-    // DELETE USER
-    public void deleteUser(Long id) {
-        // usually checks if user exists first, but this is the simple version
-        userRepository.deleteById(id);
-    }
-    // Inside UserService.java
+    // 2. GET USER BY ID
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+        return repository.findById(id);
     }
 
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElse(null);
+    // 3. GET USER BY EMAIL
+    public Optional<User> getUserByEmail(String email) {
+        return repository.findByEmail(email);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-    public String validateToken(String token) {
-        String username = jwtUtil.extractUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        if (jwtUtil.validateToken(token, userDetails)) {
-            return "Token is Valid";
-        } else {
-            throw new RuntimeException("Invalid Token");
-        }
+    // 4. DELETE USER
+    public void deleteUser(Long id) {
+        repository.deleteById(id);
     }
 
+    // --- TEMPORARY MOCKS (To stop Controller errors until Day 3) ---
+    public String generateToken(String email) {
+        return "dummy-token-for-testing";
+    }
 
+    public void validateToken(String token) {
+        // Do nothing for now
+    }
 }

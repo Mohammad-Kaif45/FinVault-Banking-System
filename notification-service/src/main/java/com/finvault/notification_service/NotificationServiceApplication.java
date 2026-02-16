@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 public class NotificationServiceApplication {
    // Notification Service application
-	// iscq lqmb hqjb ziyp
+
 	public static void main(String[] args) {
 		SpringApplication.run(NotificationServiceApplication.class, args);
 	}

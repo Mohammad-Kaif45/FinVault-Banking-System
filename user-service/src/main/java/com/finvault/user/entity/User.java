@@ -10,48 +10,67 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    private String name;
 
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
 
-    @Column(name = "full_name") // 👈 THIS MAPS TO YOUR NEW DB COLUMN
-    private String fullName;
+    private String password;
 
     private String role;
 
-    // Constructors
-    public User() {}
+    // --- CONSTRUCTORS ---
+    public User() {
+    }
 
-    public User(String username, String password, String email, String fullName, String role) {
-        this.username = username;
-        this.password = password;
+    public User(Long id, String name, String email, String password, String role) {
+        this.id = id;
+        this.name = name;
         this.email = email;
-        this.fullName = fullName;
+        this.password = password;
         this.role = role;
     }
 
-    // --- GETTERS AND SETTERS ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // --- GETTERS AND SETTERS (This fixes your error!) ---
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getName() {
+        return name;
+    }
 
-    // 👇 ADD THESE TWO!
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    // 👇 This is the specific one you were missing!
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

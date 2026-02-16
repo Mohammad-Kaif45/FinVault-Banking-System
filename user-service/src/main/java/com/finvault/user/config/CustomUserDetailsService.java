@@ -18,8 +18,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> credential = repository.findByUsername(username);
+        // 👇 FIX: We use findByEmail instead of findByUsername
+        // (Spring passes the email into the 'username' variable)
+        Optional<User> credential = repository.findByEmail(username);
+
         return credential.map(CustomUserDetails::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }
 }
