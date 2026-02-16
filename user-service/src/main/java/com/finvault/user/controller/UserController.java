@@ -4,6 +4,9 @@ import com.finvault.user.entity.User;
 import com.finvault.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -15,12 +18,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // ⚠️ We commented this out because SecurityConfig is not ready for it yet.
-    // We will enable AuthenticationManager in Day 2.
-    // @Autowired
-    // private AuthenticationManager authenticationManager;
+    // 👇 UNCOMMENTED: This is the Login Manager
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    // ✅ 1. Get User by ID (Fixed)
+    // 1. Get User by ID
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id);
@@ -31,40 +33,38 @@ public class UserController {
         }
     }
 
-    // ✅ 2. Register User (Fixed)
+    // 2. Register User
     @PostMapping("/register")
     public ResponseEntity<String> createUser(@RequestBody User user) {
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    // ⚠️ 3. Login (Temporarily Simplified for Day 1)
+    // 👇 UPDATED: Real Login Logic
     @PostMapping("/login")
     public String login(@RequestBody User user) {
-        // We will add real Authentication here in Day 2.
-        // For now, just check if user exists to prevent errors.
-        return "Login logic coming in Day 2!";
-
-        /* // OLD CODE (Will fix in Day 2):
+        // 1. Authenticate (Check Email & Password against DB)
         Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()) // Changed getUsername to getEmail
+                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
         );
+
+        // 2. If valid, Generate Token
         if (authenticate.isAuthenticated()) {
+            // We generate the token using the EMAIL
             return userService.generateToken(user.getEmail());
         } else {
             throw new RuntimeException("Invalid Access");
         }
-        */
     }
 
-    // ✅ 4. Validate Token
+    // 4. Validate Token
     @GetMapping("/validate")
     public String validateToken(@RequestParam("token") String token) {
         userService.validateToken(token);
         return "Token is valid";
     }
 
-    // ✅ 5. Delete User
+    // 5. Delete User
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
