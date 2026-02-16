@@ -6,7 +6,7 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      # --- CORS CONFIGURATION ---
+      # --- CORS CONFIGURATION (Frontend Access) ---
       globalcors:
         cors-configurations:
           '[/**]':
@@ -20,6 +20,7 @@ spring:
       # --- END CORS ---
 
       routes:
+        # 1. User Service (Contains Login/Register)
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
@@ -27,7 +28,10 @@ spring:
           metadata:
             response-timeout: 10000
             connect-timeout: 10000
+          filters:
+            - AuthenticationFilter  # 👈 Added: The Guard checks this route (Validator will skip login/register)
 
+        # 2. Account Service (LOCKED 🔒)
         - id: account-service
           uri: lb://ACCOUNT-SERVICE
           predicates:
@@ -35,7 +39,10 @@ spring:
           metadata:
             response-timeout: 10000
             connect-timeout: 10000
+          filters:
+            - AuthenticationFilter  # 👈 Added: Must have valid Token
 
+        # 3. Transaction Service (LOCKED 🔒)
         - id: transaction-service
           uri: lb://TRANSACTION-SERVICE
           predicates:
@@ -43,13 +50,12 @@ spring:
           metadata:
             response-timeout: 10000
             connect-timeout: 10000
+          filters:
+            - AuthenticationFilter  # 👈 Added: Must have valid Token
 
 eureka:
-  # 👇 THIS IS THE CRITICAL FIX FOR WINDOWS 👇
   instance:
     prefer-ip-address: true
-  # ----------------------------------------
-
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
