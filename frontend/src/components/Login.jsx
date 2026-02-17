@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Hook for navigation
+import { useNavigate } from "react-router-dom";
+import axios from "axios"; // 👈 Import the messenger
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -13,11 +14,29 @@ function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Button Works! Email is: " + formData.email);
-    console.log("Login Data Submitted:", formData);
-    // Tomorrow we will connect this to the Backend!
+
+    try {
+      // 1. Send the data to the Backend
+      // (Make sure your Gateway is running on port 8080!)
+      const response = await axios.post("http://localhost:8080/users/login", formData);
+
+      // 2. If successful, the backend gives us a Token
+      const token = response.data;
+      console.log("Token Received:", token);
+
+      // 3. Save the Token in the Browser's "Pocket" (LocalStorage)
+      localStorage.setItem("token", token);
+
+      // 4. Send the user to the Dashboard
+      alert("Login Successful!");
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.error("Login Failed:", error);
+      alert("Login Failed! Check your email or password.");
+    }
   };
 
   return (

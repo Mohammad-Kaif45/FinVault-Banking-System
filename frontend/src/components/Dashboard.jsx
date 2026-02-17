@@ -1,99 +1,78 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import TransferForm from './TransferForm';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const Dashboard = () => {
-    const [user, setUser] = useState(null);
-    const [account, setAccount] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+function Dashboard() {
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    // Toggle for showing the Transfer Form and
-    const [showTransfer, setShowTransfer] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Get the Token
+        const token = localStorage.getItem("token");
 
-    // We define this function outside useEffect so we can call it again after a transfer
-    const fetchAccountData = async () => {
-        try {
-            // 1. Get User (ID 1)
-            const userRes = await axios.get('http://localhost:8080/users/1');
-            setUser(userRes.data);
-
-            // 2. Get Account (ID 8) - Assuming 8 is your main account now
-            const accountRes = await axios.get('http://localhost:8080/accounts/10');
-            setAccount(accountRes.data);
-
-            setLoading(false);
-        } catch (err) {
-            console.error("Error fetching data:", err);
-            setError("Could not load data. Are services running?");
-            setLoading(false);
+        // 2. If no token, go to Login
+        if (!token) {
+          window.location.href = "/login";
+          return;
         }
+
+        // 3. Prepare the Key (Header)
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
+
+        // 4. Fetch Data (Account ID 1)
+        console.log("Fetching data...");
+        const response = await axios.get("http://localhost:8080/accounts/1", config);
+
+        console.log("Data Received:", response.data);
+        setAccount(response.data);
+        setLoading(false);
+
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        setError("Could not load data. Check console.");
+        setLoading(false);
+      }
     };
 
-    useEffect(() => {
-        fetchAccountData();
-    }, []);
+    fetchData();
+  }, []);
 
-    if (loading) return <div className="text-center mt-5">Loading Dashboard...</div>;
-    if (error) return <div className="alert alert-danger m-5">{error}</div>;
+  // --- SAFE RENDERING (Prevents the White Screen Crash) ---
+  if (loading) return <h2 style={{padding: "20px"}}>🌀 Loading your dashboard...</h2>;
+  if (error) return <h2 style={{padding: "20px", color: "red"}}>⚠️ {error}</h2>;
 
-    return (
-        <div className="container mt-5">
-            <h2 className="mb-4">👋 Welcome, {user.fullName}</h2>
+  return (
+    <div style={{ padding: "50px", fontFamily: "Arial" }}>
+      <h1>📊 Your Dashboard</h1>
 
-            <div className="row">
-                {/* Profile Card */}
-                <div className="col-md-4">
-                    <div className="card shadow-sm mb-4">
-                        <div className="card-body text-center">
-                            <img
-                                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                                alt="Profile"
-                                style={{ width: '100px' }}
-                                className="mb-3"
-                            />
-                            <h4>{user.username}</h4>
-                            <p className="text-muted">{user.email}</p>
-                            <button className="btn btn-outline-primary btn-sm">Edit Profile</button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Account Section */}
-                <div className="col-md-8">
-                    {/* Balance Card */}
-                    <div className="card shadow-sm bg-primary text-white mb-4">
-                        <div className="card-body">
-                            <h5 className="card-title">Savings Account</h5>
-                            <h1 className="display-4 fw-bold">${account.balance}</h1>
-                            <p className="mb-0">Account ID: #{account.id}</p>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="d-flex gap-3 mb-4">
-                        <button
-                            className="btn btn-success btn-lg flex-grow-1"
-                            onClick={() => setShowTransfer(!showTransfer)}
-                        >
-                            {showTransfer ? "❌ Close Transfer" : "💸 Transfer Money"}
-                        </button>
-                        <button className="btn btn-secondary btn-lg flex-grow-1">
-                            📜 History
-                        </button>
-                    </div>
-
-                    {/* 🚀 CONDITIONAL RENDER: Pass ACCOUNT ID, NOT USER ID */}
-                    {showTransfer && (
-                        <TransferForm
-                            fromAccountId={account.id}
-                            refreshAccount={fetchAccountData}
-                        />
-                    )}
-                </div>
-            </div>
+      {/* Only show this box if account exists */}
+      {account ? (
+        <div style={{ border: "1px solid #ccc", padding: "20px", borderRadius: "10px", maxWidth: "400px" }}>
+          <h3>Account ID: {account.id}</h3>
+          <p><strong>Type:</strong> {account.accountType}</p>
+          <p style={{ fontSize: "24px", color: "green", fontWeight: "bold" }}>
+             Balance: ${account.balance}
+          </p>
         </div>
-    );
-};
+      ) : (
+        <p>No account data found.</p>
+      )}
+
+      <button
+        onClick={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }}
+        style={{ marginTop: "20px", padding: "10px 20px", backgroundColor: "#ff4d4d", color: "white", border: "none", cursor: "pointer" }}
+      >
+        Logout
+      </button>
+    </div>
+  );
+}
 
 export default Dashboard;
