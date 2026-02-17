@@ -1,6 +1,7 @@
 package com.finvault.user.controller;
 
 import com.finvault.user.entity.User;
+import com.finvault.user.repository.UserRepository; // 👈 Import Repository
 import com.finvault.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap; // 👈 Import Map
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -18,7 +21,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // 👇 UNCOMMENTED: This is the Login Manager
+    @Autowired
+    private UserRepository repository; // 👈 Inject Repository to find User Details
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -40,18 +45,28 @@ public class UserController {
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    // 👇 UPDATED: Real Login Logic
+    // 👇 UPDATED LOGIN LOGIC (Returns Token + ID + Name)
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        // 1. Authenticate (Check Email & Password against DB)
+    public Map<String, Object> login(@RequestBody User user) {
+        // 1. Authenticate
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
         );
 
-        // 2. If valid, Generate Token
         if (authenticate.isAuthenticated()) {
-            // We generate the token using the EMAIL
-            return userService.generateToken(user.getEmail());
+            // 2. Find the User in DB (to get ID and Name)
+            User dbUser = repository.findByEmail(user.getEmail()).get();
+
+            // 3. Generate Token
+            String token = userService.generateToken(user.getEmail());
+
+            // 4. Create Response Package
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("userId", dbUser.getId());
+            response.put("name", dbUser.getName());
+
+            return response;
         } else {
             throw new RuntimeException("Invalid Access");
         }

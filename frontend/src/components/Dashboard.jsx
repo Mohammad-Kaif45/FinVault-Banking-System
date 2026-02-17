@@ -6,29 +6,38 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 👇 Get Name from storage for the UI
+  const userName = localStorage.getItem("name") || "User";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. Get the Token
+        // 1. Get Token AND User ID
         const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("userId");
 
-        // 2. If no token, go to Login
-        if (!token) {
+        if (!token || !userId) {
           window.location.href = "/login";
           return;
         }
 
-        // 3. Prepare the Key (Header)
         const config = {
           headers: { Authorization: `Bearer ${token}` }
         };
 
-        // 4. Fetch Data (Account ID 1)
-        console.log("Fetching data...");
-        const response = await axios.get("http://localhost:8080/accounts/1", config);
+        // 2. 👇 DYNAMIC FETCH: Get accounts for THIS User ID
+        // Note: This endpoint returns a LIST (Array) of accounts
+        console.log(`Fetching accounts for user: ${userId}...`);
+        const response = await axios.get(`http://localhost:8080/accounts/user/${userId}`, config);
 
         console.log("Data Received:", response.data);
-        setAccount(response.data);
+
+        // 3. Handle the List (We pick the first account)
+        if (response.data && response.data.length > 0) {
+            setAccount(response.data[0]);
+        } else {
+            setAccount(null); // User exists but has no accounts
+        }
         setLoading(false);
 
       } catch (err) {
@@ -41,15 +50,15 @@ function Dashboard() {
     fetchData();
   }, []);
 
-  // --- SAFE RENDERING (Prevents the White Screen Crash) ---
   if (loading) return <h2 style={{padding: "20px"}}>🌀 Loading your dashboard...</h2>;
   if (error) return <h2 style={{padding: "20px", color: "red"}}>⚠️ {error}</h2>;
 
   return (
     <div style={{ padding: "50px", fontFamily: "Arial" }}>
-      <h1>📊 Your Dashboard</h1>
+      {/* 👇 Personal Welcome Message */}
+      <h1>👋 Welcome, {userName}!</h1>
+      <h3>Your Financial Overview:</h3>
 
-      {/* Only show this box if account exists */}
       {account ? (
         <div style={{ border: "1px solid #ccc", padding: "20px", borderRadius: "10px", maxWidth: "400px" }}>
           <h3>Account ID: {account.id}</h3>
@@ -59,12 +68,16 @@ function Dashboard() {
           </p>
         </div>
       ) : (
-        <p>No account data found.</p>
+        <div style={{ border: "1px solid orange", padding: "20px", maxWidth: "400px" }}>
+            <p><strong>No Accounts Found.</strong></p>
+            <p>It looks like you haven't created a bank account yet.</p>
+        </div>
       )}
 
       <button
         onClick={() => {
-            localStorage.removeItem("token");
+            // Clear everything on Logout
+            localStorage.clear();
             window.location.href = "/login";
         }}
         style={{ marginTop: "20px", padding: "10px 20px", backgroundColor: "#ff4d4d", color: "white", border: "none", cursor: "pointer" }}

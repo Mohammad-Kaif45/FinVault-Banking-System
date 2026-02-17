@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // 👈 Import the messenger
+import axios from "axios";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -18,19 +18,22 @@ function Login() {
     e.preventDefault();
 
     try {
-      // 1. Send the data to the Backend
-      // (Make sure your Gateway is running on port 8080!)
+      // 1. Send Creds to Backend
       const response = await axios.post("http://localhost:8080/users/login", formData);
 
-      // 2. If successful, the backend gives us a Token
-      const token = response.data;
-      console.log("Token Received:", token);
+      // 2. 👇 NEW: Extract Token + User Details
+      // The backend now sends: { "token": "...", "userId": 1, "name": "Saif" }
+      const { token, userId, name } = response.data;
 
-      // 3. Save the Token in the Browser's "Pocket" (LocalStorage)
+      console.log("Login Success:", response.data);
+
+      // 3. Save EVERYTHING to LocalStorage
       localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("name", name);
 
-      // 4. Send the user to the Dashboard
-      alert("Login Successful!");
+      // 4. Redirect with a personal welcome
+      alert("Login Successful! Welcome " + name);
       navigate("/dashboard");
 
     } catch (error) {
