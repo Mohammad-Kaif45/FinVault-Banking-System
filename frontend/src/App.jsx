@@ -1,20 +1,22 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import Dashboard from './components/Dashboard';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard"; // Assuming you have this from Week 6/7
 
 function App() {
   return (
-    <div>
-      {/* Simple Navbar */}
-      <nav className="navbar navbar-dark bg-dark mb-4">
-        <div className="container">
-          <span className="navbar-brand mb-0 h1">🏦 FinVault Banking</span>
-        </div>
-      </nav>
+    <Router>
+      <Routes>
+        {/* Default Route: Redirect to Login for now */}
+        <Route path="/" element={<Navigate to="/login" />} />
 
-      {/* Render the Dashboard */}
-      <Dashboard />
-    </div>
-  )
+        {/* The Login Page */}
+        <Route path="/login" element={<Login />} />
+
+        {/* The Dashboard (We will protect this in Day 4!) */}
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
