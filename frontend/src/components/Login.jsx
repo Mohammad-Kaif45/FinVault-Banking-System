@@ -35,21 +35,40 @@ function Login() {
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "'Segoe UI', sans-serif", backgroundColor: "#f4f7f6" }}>
 
-      {/* 👇 ANIMATION STYLES INJECTED HERE */}
+      {/* 👇 CSS ANIMATIONS & HOVER EFFECTS */}
       <style>
         {`
+          /* 1. Left Side Text Animation */
           @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
           }
           .animate-text {
-            animation: fadeInUp 0.8s ease-out forwards; /* Smooth fade in */
-            opacity: 0; /* Start hidden */
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+          }
+
+          /* 2. Right Side Box Hover Effect (The Zoom) */
+          .login-box {
+            transition: transform 0.4s ease, box-shadow 0.4s ease; /* Smooth Speed */
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.05);
+          }
+
+          /* When mouse moves over the box */
+          .login-box:hover {
+            transform: scale(1.03); /* Zooms in slightly */
+            box-shadow: 0px 20px 60px rgba(0,0,0,0.15); /* Shadow grows */
           }
         `}
       </style>
 
-      {/* 🟢 LEFT SIDE: Branding & Information */}
+      {/* 🟢 LEFT SIDE: Branding */}
       <div style={{
         flex: "1",
         background: "linear-gradient(135deg, #0061f2 0%, #00ba88 100%)",
@@ -59,32 +78,23 @@ function Login() {
         justifyContent: "center",
         padding: "60px"
       }}>
-
-        {/* 1. FinVault Title (Appears Immediately) */}
         <h1 className="animate-text" style={{ fontSize: "56px", marginBottom: "10px", animationDelay: "0.2s" }}>
           FinVault 🏦
         </h1>
-
-        {/* 2. Subtitle (Appears after 0.5s) */}
         <h2 className="animate-text" style={{ fontWeight: "300", marginBottom: "30px", animationDelay: "0.5s" }}>
           Secure Banking for Everyone.
         </h2>
-
-        {/* 3. Features List (Appears after 0.8s) */}
         <div className="animate-text" style={{ fontSize: "18px", lineHeight: "1.8", opacity: "0", animationDelay: "0.8s" }}>
           <p>✅ <strong>Instant Transfers:</strong> Send money in seconds.</p>
           <p>✅ <strong>Secure Accounts:</strong> Industry-standard protection.</p>
           <p>✅ <strong>24/7 Access:</strong> Manage your wealth anytime.</p>
         </div>
-
-        {/* 4. Trust Text (Appears after 1.1s) */}
         <p className="animate-text" style={{ marginTop: "40px", fontSize: "16px", opacity: "0", animationDelay: "1.2s", fontStyle: "italic" }}>
           "Join over 10,000 users trusting FinVault today."
         </p>
-
       </div>
 
-      {/* ⚪ RIGHT SIDE: Login Form */}
+      {/* ⚪ RIGHT SIDE: Login Form (Now with Hover Effect) */}
       <div style={{
         flex: "1",
         display: "flex",
@@ -93,11 +103,9 @@ function Login() {
         alignItems: "center",
         backgroundColor: "#ffffff"
       }}>
-        <div style={{
-          width: "100%", maxWidth: "400px", padding: "40px",
-          borderRadius: "12px", boxShadow: "0px 10px 30px rgba(0,0,0,0.05)",
-          backgroundColor: "white", border: "1px solid #e0e0e0"
-        }}>
+
+        {/* 👇 ADDED CLASS NAME "login-box" HERE */}
+        <div className="login-box">
           <h2 style={{ color: "#333", textAlign: "center", marginBottom: "5px" }}>Welcome Back</h2>
           <p style={{ color: "#666", textAlign: "center", marginBottom: "30px" }}>Please enter your details to sign in.</p>
 
@@ -126,7 +134,7 @@ function Login() {
 
             <button
               type="submit"
-              style={{ width: "100%", backgroundColor: "#0061f2", color: "white", padding: "14px", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "16px", fontWeight: "bold" }}
+              style={{ width: "100%", backgroundColor: "#0061f2", color: "white", padding: "14px", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "16px", fontWeight: "bold", transition: "0.3s" }}
               onMouseOver={(e) => e.target.style.backgroundColor = "#0051c9"}
               onMouseOut={(e) => e.target.style.backgroundColor = "#0061f2"}
             >
