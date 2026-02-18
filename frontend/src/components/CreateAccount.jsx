@@ -41,7 +41,9 @@ function CreateAccount() {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      await axios.post("http://localhost:8080/accounts", payload, config);
+
+
+      await axios.post("http://localhost:8080/accounts/create", payload, config);
 
       // 4. Success!
       alert("Account Created Successfully! 🎉");
