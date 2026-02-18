@@ -65,9 +65,26 @@ function Dashboard() {
           <p style={{ fontSize: "24px", color: "green", fontWeight: "bold" }}>
              Balance: ${account.balance}
           </p>
+
+          {/* 👇 ADDED WITHDRAW & TRANSFER BUTTONS 👇 */}
+          <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+            <button
+                onClick={() => window.location.href = `/withdraw/${account.id}`}
+                style={{ flex: 1, padding: "10px", backgroundColor: "#ffc107", border: "none", cursor: "pointer", fontWeight: "bold" }}
+            >
+                💸 Withdraw
+            </button>
+
+            <button
+                onClick={() => window.location.href = `/transfer/${account.id}`}
+                style={{ flex: 1, padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer", fontWeight: "bold" }}
+            >
+                🔄 Transfer
+            </button>
+          </div>
+
         </div>
       ) : (
-        // 👇 UPDATED SECTION: SHOW CREATE BUTTON 👇
         <div style={{ border: "2px dashed #ccc", padding: "30px", maxWidth: "400px", textAlign: "center" }}>
             <h3>No Accounts Found</h3>
             <p>It looks like you are new here!</p>

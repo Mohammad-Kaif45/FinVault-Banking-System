@@ -3,6 +3,8 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard"; // Assuming you have this from Week 6/7
 import Register from "./components/Register";
 import CreateAccount from "./components/CreateAccount";
+import Withdraw from "./components/Withdraw";
+import Transfer from "./components/Transfer";
 function App() {
   return (
     <Router>
@@ -16,6 +18,9 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/create-account" element={<CreateAccount />} />
+
+        <Route path="/withdraw/:accountId" element={<Withdraw />} />
+        <Route path="/transfer/:accountId" element={<Transfer />} />
 
 
 
