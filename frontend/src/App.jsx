@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard"; // Assuming you have this from Week 6/7
 import Register from "./components/Register";
+import CreateAccount from "./components/CreateAccount";
 function App() {
   return (
     <Router>
@@ -13,6 +14,10 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
+
+        <Route path="/create-account" element={<CreateAccount />} />
+
+
 
         {/* The Dashboard (We will protect this in Day 4!) */}
         <Route path="/dashboard" element={<Dashboard />} />

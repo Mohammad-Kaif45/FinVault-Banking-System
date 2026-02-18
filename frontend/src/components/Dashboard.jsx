@@ -26,7 +26,6 @@ function Dashboard() {
         };
 
         // 2. 👇 DYNAMIC FETCH: Get accounts for THIS User ID
-        // Note: This endpoint returns a LIST (Array) of accounts
         console.log(`Fetching accounts for user: ${userId}...`);
         const response = await axios.get(`http://localhost:8080/accounts/user/${userId}`, config);
 
@@ -68,9 +67,16 @@ function Dashboard() {
           </p>
         </div>
       ) : (
-        <div style={{ border: "1px solid orange", padding: "20px", maxWidth: "400px" }}>
-            <p><strong>No Accounts Found.</strong></p>
-            <p>It looks like you haven't created a bank account yet.</p>
+        // 👇 UPDATED SECTION: SHOW CREATE BUTTON 👇
+        <div style={{ border: "2px dashed #ccc", padding: "30px", maxWidth: "400px", textAlign: "center" }}>
+            <h3>No Accounts Found</h3>
+            <p>It looks like you are new here!</p>
+            <button
+                onClick={() => window.location.href = "/create-account"}
+                style={{ padding: "10px 20px", backgroundColor: "#28a745", color: "white", border: "none", cursor: "pointer", fontSize: "16px" }}
+            >
+                ➕ Create Your First Account
+            </button>
         </div>
       )}
 
