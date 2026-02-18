@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard"; // Assuming you have this from Week 6/7
-
+import Register from "./components/Register";
 function App() {
   return (
     <Router>
@@ -11,6 +11,8 @@ function App() {
 
         {/* The Login Page */}
         <Route path="/login" element={<Login />} />
+
+        <Route path="/register" element={<Register />} />
 
         {/* The Dashboard (We will protect this in Day 4!) */}
         <Route path="/dashboard" element={<Dashboard />} />

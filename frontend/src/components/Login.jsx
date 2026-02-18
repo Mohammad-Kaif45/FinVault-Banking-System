@@ -21,8 +21,7 @@ function Login() {
       // 1. Send Creds to Backend
       const response = await axios.post("http://localhost:8080/users/login", formData);
 
-      // 2. 👇 NEW: Extract Token + User Details
-      // The backend now sends: { "token": "...", "userId": 1, "name": "Saif" }
+      // 2. Extract Token + User Details
       const { token, userId, name } = response.data;
 
       console.log("Login Success:", response.data);
@@ -75,6 +74,12 @@ function Login() {
           Login
         </button>
       </form>
+
+      {/* 👇 ADDED THIS LINK FOR NEW USERS 👇 */}
+      <p style={{ marginTop: "20px" }}>
+        Don't have an account? <a href="/register" style={{ color: "blue", fontWeight: "bold" }}>Sign up here</a>
+      </p>
+
     </div>
   );
 }
