@@ -52,7 +52,7 @@ function Transfer() {
         </div>
 
         <div style={{ marginBottom: "10px" }}>
-          <label>Amount ($):</label><br />
+          <label>Amount (₹):</label>
           <input type="number" name="amount" onChange={handleChange} required style={{ padding: "8px", width: "250px" }} />
         </div>
 

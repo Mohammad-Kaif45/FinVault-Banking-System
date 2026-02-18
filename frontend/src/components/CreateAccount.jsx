@@ -74,7 +74,7 @@ function CreateAccount() {
         </div>
 
         <div style={{ marginBottom: "15px" }}>
-          <label>Initial Deposit ($):</label><br />
+          <label>Initial Deposit (₹):</label>
           <input
             type="number"
             name="balance"

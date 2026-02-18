@@ -36,7 +36,7 @@ function Withdraw() {
 
       <form onSubmit={handleWithdraw}>
         <div style={{ marginBottom: "15px" }}>
-          <label>Amount ($):</label><br />
+          <label>Initial Deposit (₹):</label>
           <input
             type="number"
             value={amount}
