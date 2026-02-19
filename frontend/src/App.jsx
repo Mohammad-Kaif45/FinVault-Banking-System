@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
-import Dashboard from "./components/Dashboard"; // Assuming you have this from Week 6/7
+import Dashboard from "./components/Dashboard";
 import Register from "./components/Register";
 import CreateAccount from "./components/CreateAccount";
 import Withdraw from "./components/Withdraw";
