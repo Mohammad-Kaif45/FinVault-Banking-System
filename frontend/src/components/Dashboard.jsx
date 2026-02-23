@@ -116,7 +116,6 @@ function Dashboard() {
               <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
                  <div>
                      <div style={styles.label}>Available Balance</div>
-                     {/* 👇 UPDATED: Rupee Symbol & Indian Formatting (en-IN) */}
                      <div style={styles.balance}>₹{account.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
                  </div>
                  <div style={{textAlign: "right"}}>
@@ -128,9 +127,15 @@ function Dashboard() {
               <div style={{borderTop: `1px solid ${theme.border}`, paddingTop: "20px"}}>
                   <div style={styles.label}>Account Details</div>
                   <div style={{display: "flex", gap: "40px"}}>
-                      <div><div style={{fontSize: "13px", color: theme.textSec}}>Account Number</div><div style={{fontWeight: "500"}}>**** **** {account.id + 1020}</div></div>
+                      {/* 👇 UPDATED: Showing the actual account number from database */}
+                      <div>
+                        <div style={{fontSize: "13px", color: theme.textSec}}>Account Number</div>
+                        <div style={{fontWeight: "500", letterSpacing: "0.5px"}}>
+                          {account.accountNumber}
+                        </div>
+                      </div>
+
                       <div><div style={{fontSize: "13px", color: theme.textSec}}>Account Type</div><div style={{fontWeight: "500"}}>{account.accountType}</div></div>
-                      {/* 👇 UPDATED: INR Currency */}
                       <div><div style={{fontSize: "13px", color: theme.textSec}}>Currency</div><div style={{fontWeight: "500"}}>INR</div></div>
                   </div>
               </div>
@@ -158,4 +163,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Added for safety
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.List; // hello
 import java.util.UUID;
 
 @Service
@@ -17,7 +17,11 @@ public class AccountService {
 
     // 1. Create Account
     public Account createAccount(Account account) {
-        account.setAccountNumber(UUID.randomUUID().toString());
+
+        long first15Digits = (long) (Math.random() * 1000000000000000L);
+        String sixteenDigitNumber = String.format("%016d", first15Digits);
+        account.setAccountNumber(sixteenDigitNumber);
+
         if (account.getBalance() == null) {
             account.setBalance(BigDecimal.ZERO);
         }
