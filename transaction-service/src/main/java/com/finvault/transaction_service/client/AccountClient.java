@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "ACCOUNT-SERVICE")
 public interface AccountClient {
 
-    // ✅ Ensure these are @PostMapping, NOT @PutMapping
-    // ✅ Ensure the path is exactly "/accounts/deposit"
+    // ✅ Changed from Long to String to match the 16-digit Account Number
+    // ✅ Updated the path to a dedicated "/feign" endpoint to avoid conflicts
 
-    @PostMapping("/accounts/deposit")
-    void deposit(@RequestParam("id") Long id, @RequestParam("amount") Double amount);
+    @PostMapping("/accounts/feign/deposit")
+    void deposit(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") Double amount);
 
-    @PostMapping("/accounts/withdraw")
-    void withdraw(@RequestParam("id") Long id, @RequestParam("amount") Double amount);
+    @PostMapping("/accounts/feign/withdraw")
+    void withdraw(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") Double amount);
 }

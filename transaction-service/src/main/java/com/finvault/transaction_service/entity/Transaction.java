@@ -12,33 +12,33 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long fromAccountId; // The Sender
-    private Long toAccountId;   // The Receiver
+    // 👇 UPDATED: Changed from Long to String for the 16-digit numbers
+    private String fromAccountNumber; // The Sender
+    private String toAccountNumber;   // The Receiver
+
     private BigDecimal amount;
     private LocalDateTime timestamp;
     private String status;      // "SUCCESS" or "FAILED"
 
-    // --- CONSTRUCTORS & GETTERS/SETTERS ---
-
     public Transaction() {}
 
-    public Transaction(Long fromAccountId, Long toAccountId, BigDecimal amount, String status) {
-        this.fromAccountId = fromAccountId;
-        this.toAccountId = toAccountId;
+    public Transaction(String fromAccountNumber, String toAccountNumber, BigDecimal amount, String status) {
+        this.fromAccountNumber = fromAccountNumber;
+        this.toAccountNumber = toAccountNumber;
         this.amount = amount;
         this.status = status;
         this.timestamp = LocalDateTime.now(); // Automatically set the time to NOW
     }
 
-    // Getters and Setters
+    // --- GETTERS AND SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getFromAccountId() { return fromAccountId; }
-    public void setFromAccountId(Long fromAccountId) { this.fromAccountId = fromAccountId; }
+    public String getFromAccountNumber() { return fromAccountNumber; }
+    public void setFromAccountNumber(String fromAccountNumber) { this.fromAccountNumber = fromAccountNumber; }
 
-    public Long getToAccountId() { return toAccountId; }
-    public void setToAccountId(Long toAccountId) { this.toAccountId = toAccountId; }
+    public String getToAccountNumber() { return toAccountNumber; }
+    public void setToAccountNumber(String toAccountNumber) { this.toAccountNumber = toAccountNumber; }
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }

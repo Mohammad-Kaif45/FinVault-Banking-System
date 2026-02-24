@@ -14,47 +14,44 @@ public class TransactionController {
 
     @PostMapping("/deposit")
     public Transaction deposit(@RequestBody TransactionRequest request) {
-        return transactionService.depositMoney(request.getAccountId(), request.getAmount());
+        return transactionService.depositMoney(request.getAccountNumber(), request.getAmount());
     }
 
     @PostMapping("/withdraw")
     public Transaction withdraw(@RequestBody TransactionRequest request) {
-        return transactionService.withdrawMoney(request.getAccountId(), request.getAmount());
+        return transactionService.withdrawMoney(request.getAccountNumber(), request.getAmount());
     }
 
     @PostMapping("/transfer")
     public Transaction transfer(@RequestBody TransferRequest request) {
-        // Map DTO fields to Service method
         return transactionService.transferMoney(
-                request.getFromAccountId(),
-                request.getReceiverAccountId(),
+                request.getFromAccountNumber(),
+                request.getReceiverAccountNumber(),
                 request.getAmount()
         );
     }
 
     // --- DTOs ---
     public static class TransactionRequest {
-        private Long accountId;
+        private String accountNumber; // 👈 Changed to String
         private Double amount;
-        // Getters/Setters
-        public Long getAccountId() { return accountId; }
-        public void setAccountId(Long accountId) { this.accountId = accountId; }
+
+        public String getAccountNumber() { return accountNumber; }
+        public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
         public Double getAmount() { return amount; }
         public void setAmount(Double amount) { this.amount = amount; }
     }
 
     public static class TransferRequest {
-        // 👇 Changed variable name to match Frontend JSON
-        private Long fromAccountId;
-        private Long receiverAccountId;
+        private String fromAccountNumber;     // 👈 Changed to String
+        private String receiverAccountNumber; // 👈 Changed to String
         private Double amount;
 
-        // Getters/Setters
-        public Long getFromAccountId() { return fromAccountId; }
-        public void setFromAccountId(Long fromAccountId) { this.fromAccountId = fromAccountId; }
+        public String getFromAccountNumber() { return fromAccountNumber; }
+        public void setFromAccountNumber(String fromAccountNumber) { this.fromAccountNumber = fromAccountNumber; }
 
-        public Long getReceiverAccountId() { return receiverAccountId; }
-        public void setReceiverAccountId(Long receiverAccountId) { this.receiverAccountId = receiverAccountId; }
+        public String getReceiverAccountNumber() { return receiverAccountNumber; }
+        public void setReceiverAccountNumber(String receiverAccountNumber) { this.receiverAccountNumber = receiverAccountNumber; }
 
         public Double getAmount() { return amount; }
         public void setAmount(Double amount) { this.amount = amount; }

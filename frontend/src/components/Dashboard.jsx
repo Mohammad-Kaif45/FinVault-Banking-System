@@ -3,12 +3,16 @@ import axios from "axios";
 
 function Dashboard() {
   const [account, setAccount] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingTx, setLoadingTx] = useState(false);
   const [error, setError] = useState(null);
+
   const userName = localStorage.getItem("name") || "Client";
 
+  // 1. Fetch Account Details
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAccount = async () => {
       try {
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("userId");
@@ -16,22 +20,69 @@ function Dashboard() {
 
         const config = { headers: { Authorization: `Bearer ${token}` } };
         const response = await axios.get(`http://localhost:8080/accounts/user/${userId}`, config);
-        setAccount(response.data && response.data.length > 0 ? response.data[0] : null);
+
+        if (response.data && response.data.length > 0) {
+            setAccount(response.data[0]);
+        } else {
+            setAccount(null);
+        }
         setLoading(false);
       } catch (err) {
         setError("System unavailable. Please contact support.");
         setLoading(false);
       }
     };
-    fetchData();
+    fetchAccount();
   }, []);
 
+  // 2. Fetch Transaction History (Triggers after account is loaded)
+  useEffect(() => {
+    if (account && account.accountNumber) {
+      const fetchTransactions = async () => {
+        setLoadingTx(true);
+        try {
+          const token = localStorage.getItem("token");
+          const config = { headers: { Authorization: `Bearer ${token}` } };
+
+          // ⚠️ NOTE: Ensure your Transaction Service is running on port 8081!
+          const res = await axios.get(`http://localhost:8081/transactions/history/${account.accountNumber}`, config);
+          setTransactions(res.data);
+        } catch (err) {
+          console.error("Ledger fetch error:", err);
+        } finally {
+          setLoadingTx(false);
+        }
+      };
+      fetchTransactions();
+    }
+  }, [account]);
+
+  // --- CORPORATE STYLES ---
   const theme = { bg: "#F3F4F6", header: "#111827", cardBg: "#FFFFFF", primary: "#2563EB", textMain: "#1F2937", textSec: "#6B7280", border: "#E5E7EB" };
+
+  // --- HELPER TO FORMAT TRANSACTIONS ---
+  const getTxDetails = (tx) => {
+    const isOutgoing = tx.fromAccountNumber === account.accountNumber;
+    let type = "Transfer";
+    let counterpart = isOutgoing ? `To: ${tx.toAccountNumber}` : `From: ${tx.fromAccountNumber}`;
+
+    if (!tx.fromAccountNumber) { type = "Deposit"; counterpart = "Branch/ATM"; }
+    if (!tx.toAccountNumber) { type = "Withdrawal"; counterpart = "Branch/ATM"; }
+
+    return {
+      type,
+      counterpart,
+      amountPrefix: isOutgoing ? "-" : "+",
+      amountColor: isOutgoing ? theme.textMain : "#10B981" // Green for money coming in
+    };
+  };
 
   if (loading) return <div style={{padding: "50px", fontFamily: "sans-serif"}}>Loading Enterprise Portal...</div>;
 
   return (
-    <div style={{ backgroundColor: theme.bg, minHeight: "100vh", fontFamily: "sans-serif" }}>
+    <div style={{ backgroundColor: theme.bg, minHeight: "100vh", fontFamily: "sans-serif", paddingBottom: "60px" }}>
+
+      {/* HEADER */}
       <div style={{ backgroundColor: theme.header, color: "white", padding: "0 10%", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: "20px", fontWeight: "600" }}>FinVault <span style={{fontWeight:"300", opacity:0.7}}>Enterprise</span></div>
         <div style={{ fontSize: "14px" }}>
@@ -41,50 +92,109 @@ function Dashboard() {
       </div>
 
       <div style={{ padding: "40px 10%", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "24px", fontWeight: "500", marginBottom: "20px" }}>Account Overview</h1>
+        <h1 style={{ fontSize: "24px", fontWeight: "500", marginBottom: "20px", color: theme.textMain }}>Account Overview</h1>
 
         {account ? (
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
-            <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
-              <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
-                 <div>
-                     <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600"}}>AVAILABLE BALANCE</div>
-                     <div style={{fontSize: "36px", fontWeight: "700"}}>₹{account.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
-                 </div>
-                 <span style={{backgroundColor: "#DEF7EC", color: "#03543F", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", height: "fit-content"}}>ACTIVE</span>
+          <>
+            {/* TOP GRID: BALANCE & ACTIONS */}
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
+
+              {/* BALANCE CARD */}
+              <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
+                <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
+                   <div>
+                       <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600"}}>AVAILABLE BALANCE</div>
+                       <div style={{fontSize: "36px", fontWeight: "700"}}>₹{account.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
+                   </div>
+                   <span style={{backgroundColor: "#DEF7EC", color: "#03543F", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", height: "fit-content"}}>ACTIVE</span>
+                </div>
+
+                <div style={{borderTop: `1px solid ${theme.border}`, paddingTop: "20px", display: "flex", gap: "40px"}}>
+                    <div>
+                      <div style={{fontSize: "13px", color: theme.textSec}}>Account Number</div>
+                      <div style={{fontWeight: "600", letterSpacing: "1px"}}>{account.accountNumber}</div>
+                    </div>
+                    <div>
+                      <div style={{fontSize: "13px", color: theme.textSec}}>Account Type</div>
+                      <div style={{fontWeight: "600"}}>{account.accountType}</div>
+                    </div>
+                </div>
               </div>
 
-              <div style={{borderTop: `1px solid ${theme.border}`, paddingTop: "20px", display: "flex", gap: "40px"}}>
-                  <div>
-                    <div style={{fontSize: "13px", color: theme.textSec}}>Account Number</div>
-                    <div style={{fontWeight: "600", letterSpacing: "1px"}}>{account.accountNumber}</div>
-                  </div>
-                  <div>
-                    <div style={{fontSize: "13px", color: theme.textSec}}>Account Type</div>
-                    <div style={{fontWeight: "600"}}>{account.accountType}</div>
-                  </div>
+              {/* QUICK ACTIONS CARD */}
+              <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
+                <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600", marginBottom: "15px"}}>QUICK ACTIONS</div>
+                <button
+                  style={{ width: "100%", backgroundColor: theme.primary, color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px" }}
+                  onClick={() => window.location.href = `/transfer/${account.id}`}
+                >
+                  Transfer Funds &rarr;
+                </button>
+                <button
+                  style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer" }}
+                  onClick={() => window.location.href = `/withdraw/${account.id}`}
+                >
+                  Withdraw Cash
+                </button>
               </div>
             </div>
 
-            <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
-              <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600", marginBottom: "15px"}}>QUICK ACTIONS</div>
-              <button
-                style={{ width: "100%", backgroundColor: theme.primary, color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px" }}
-                onClick={() => window.location.href = `/transfer/${account.id}`}
-              >
-                Transfer Funds &rarr;
-              </button>
-              <button
-                style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer" }}
-                onClick={() => window.location.href = `/withdraw/${account.id}`}
-              >
-                Withdraw Cash
-              </button>
+            {/* BOTTOM SECTION: TRANSACTION LEDGER */}
+            <div style={{ marginTop: "24px", backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
+              <div style={{ fontSize: "16px", fontWeight: "600", color: theme.textMain, marginBottom: "20px" }}>Transaction History</div>
+
+              {loadingTx ? (
+                 <div style={{ color: theme.textSec, fontSize: "14px", padding: "20px 0" }}>Syncing ledger data...</div>
+              ) : transactions.length > 0 ? (
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: `1px solid ${theme.border}`, color: theme.textSec, fontSize: "12px", textTransform: "uppercase" }}>
+                        <th style={{ padding: "12px 0", fontWeight: "600" }}>Date & Time</th>
+                        <th style={{ padding: "12px 0", fontWeight: "600" }}>Type</th>
+                        <th style={{ padding: "12px 0", fontWeight: "600" }}>Details</th>
+                        <th style={{ padding: "12px 0", fontWeight: "600", textAlign: "right" }}>Amount</th>
+                        <th style={{ padding: "12px 0", fontWeight: "600", textAlign: "center" }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map((tx) => {
+                        const { type, counterpart, amountPrefix, amountColor } = getTxDetails(tx);
+                        return (
+                          <tr key={tx.id} style={{ borderBottom: `1px solid ${theme.border}`, fontSize: "14px" }}>
+                            <td style={{ padding: "16px 0", color: theme.textSec }}>
+                              {new Date(tx.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                            </td>
+                            <td style={{ padding: "16px 0", fontWeight: "500" }}>{type}</td>
+                            <td style={{ padding: "16px 0", color: theme.textSec }}>{counterpart}</td>
+                            <td style={{ padding: "16px 0", fontWeight: "600", color: amountColor, textAlign: "right" }}>
+                              {amountPrefix}₹{tx.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                            </td>
+                            <td style={{ padding: "16px 0", textAlign: "center" }}>
+                              <span style={{
+                                backgroundColor: tx.status.includes("SUCCESS") ? "#DEF7EC" : "#FDE8E8",
+                                color: tx.status.includes("SUCCESS") ? "#03543F" : "#9B1C1C",
+                                padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "600"
+                              }}>
+                                {tx.status.split('_').pop()}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "40px", color: theme.textSec, fontSize: "14px" }}>
+                  No transactions found for this account.
+                </div>
+              )}
             </div>
-          </div>
+          </>
         ) : (
           <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "60px", textAlign: "center" }}>
-            <h3>No Accounts Found</h3>
+            <h3 style={{ color: theme.textMain }}>No Accounts Found</h3>
             <button style={{ backgroundColor: theme.primary, color: "white", padding: "12px 24px", borderRadius: "6px", border: "none", marginTop: "20px", cursor: "pointer" }} onClick={() => window.location.href = "/create-account"}>Open New Account</button>
           </div>
         )}
@@ -92,4 +202,5 @@ function Dashboard() {
     </div>
   );
 }
+
 export default Dashboard;

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -57,12 +56,9 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    // 👇 FIXED: This now expects a String targetAccountNumber
     @Transactional
     public void transfer(Long sourceId, String targetAccountNumber, Double amount) {
-
         Account sourceAccount = getAccountById(sourceId);
-
         Account targetAccount = accountRepository.findByAccountNumber(targetAccountNumber)
                 .orElseThrow(() -> new RuntimeException("Target account number not found"));
 
@@ -80,5 +76,30 @@ public class AccountService {
         accountRepository.save(targetAccount);
 
         System.out.println("💸 Transfer Complete: ₹" + amount + " to Account Number " + targetAccountNumber);
+    }
+
+    // --- 👇 NEW: MICROSERVICE LOGIC FOR FEIGN CLIENT 👇 ---
+
+    public void depositByNumber(String accountNumber, Double amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found for deposit: " + accountNumber));
+
+        account.setBalance(account.getBalance().add(BigDecimal.valueOf(amount)));
+        accountRepository.save(account);
+        System.out.println("✅ Feign Deposit: ₹" + amount + " to " + accountNumber);
+    }
+
+    public void withdrawByNumber(String accountNumber, Double amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found for withdrawal: " + accountNumber));
+
+        BigDecimal withdrawAmount = BigDecimal.valueOf(amount);
+        if (account.getBalance().compareTo(withdrawAmount) < 0) {
+            throw new RuntimeException("Insufficient Funds for Account: " + accountNumber);
+        }
+
+        account.setBalance(account.getBalance().subtract(withdrawAmount));
+        accountRepository.save(account);
+        System.out.println("✅ Feign Withdraw: ₹" + amount + " from " + accountNumber);
     }
 }

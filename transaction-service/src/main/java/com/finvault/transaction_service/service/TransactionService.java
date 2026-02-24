@@ -1,7 +1,7 @@
 package com.finvault.transaction_service.service;
 
 import com.finvault.transaction_service.client.AccountClient;
-import com.finvault.transaction_service.dto.TransactionEvent; // 👈 Make sure this import exists
+import com.finvault.transaction_service.dto.TransactionEvent;
 import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.repository.TransactionRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -20,7 +20,6 @@ public class TransactionService {
     @Autowired
     private AccountClient accountClient;
 
-    // 👇 FIXED: Changed to <String, Object> so we can send JSON
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -28,19 +27,19 @@ public class TransactionService {
 
     // --- 1. DEPOSIT LOGIC ---
     @CircuitBreaker(name = "accountService", fallbackMethod = "depositFallback")
-    public Transaction depositMoney(Long accountId, Double amount) {
-        accountClient.deposit(accountId, amount);
+    public Transaction depositMoney(String accountNumber, Double amount) { // 👈 Changed to String
+        accountClient.deposit(accountNumber, amount);
 
         Transaction transaction = new Transaction(
-                null, accountId, BigDecimal.valueOf(amount), "DEPOSIT_SUCCESS"
+                null, accountNumber, BigDecimal.valueOf(amount), "DEPOSIT_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // It is for kafka and for now i am commenting these
+        // Uncomment for Kafka later
 //        TransactionEvent event = new TransactionEvent(
 //                "DEPOSIT",
 //                null,
-//                accountId.toString(),
+//                accountNumber, // No need for .toString() anymore
 //                BigDecimal.valueOf(amount),
 //                "SUCCESS"
 //        );
@@ -49,25 +48,24 @@ public class TransactionService {
         return savedTransaction;
     }
 
-    public Transaction depositFallback(Long accountId, Double amount, Throwable t) {
+    public Transaction depositFallback(String accountNumber, Double amount, Throwable t) {
         System.err.println("Fallback executed: " + t.getMessage());
-        return transactionRepository.save(new Transaction(null, accountId, BigDecimal.valueOf(amount), "FAILED"));
+        return transactionRepository.save(new Transaction(null, accountNumber, BigDecimal.valueOf(amount), "FAILED"));
     }
 
     // --- 2. WITHDRAW LOGIC ---
     @CircuitBreaker(name = "accountService", fallbackMethod = "withdrawFallback")
-    public Transaction withdrawMoney(Long accountId, Double amount) {
-        accountClient.withdraw(accountId, amount);
+    public Transaction withdrawMoney(String accountNumber, Double amount) { // 👈 Changed to String
+        accountClient.withdraw(accountNumber, amount);
 
         Transaction transaction = new Transaction(
-                accountId, null, BigDecimal.valueOf(amount), "WITHDRAW_SUCCESS"
+                accountNumber, null, BigDecimal.valueOf(amount), "WITHDRAW_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // 👇 FIXED: Sending OBJECT, not String
 //        TransactionEvent event = new TransactionEvent(
 //                "WITHDRAW",
-//                accountId.toString(),
+//                accountNumber,
 //                null,
 //                BigDecimal.valueOf(amount),
 //                "SUCCESS"
@@ -77,25 +75,24 @@ public class TransactionService {
         return savedTransaction;
     }
 
-    public Transaction withdrawFallback(Long accountId, Double amount, Throwable t) {
-        return transactionRepository.save(new Transaction(accountId, null, BigDecimal.valueOf(amount), "FAILED"));
+    public Transaction withdrawFallback(String accountNumber, Double amount, Throwable t) {
+        return transactionRepository.save(new Transaction(accountNumber, null, BigDecimal.valueOf(amount), "FAILED"));
     }
 
     // --- 3. TRANSFER LOGIC ---
-    public Transaction transferMoney(Long fromAccountId, Long toAccountId, Double amount) {
-        accountClient.withdraw(fromAccountId, amount);
-        accountClient.deposit(toAccountId, amount);
+    public Transaction transferMoney(String fromAccountNumber, String toAccountNumber, Double amount) { // 👈 Changed to String
+        accountClient.withdraw(fromAccountNumber, amount);
+        accountClient.deposit(toAccountNumber, amount);
 
         Transaction transaction = new Transaction(
-                fromAccountId, toAccountId, BigDecimal.valueOf(amount), "TRANSFER_SUCCESS"
+                fromAccountNumber, toAccountNumber, BigDecimal.valueOf(amount), "TRANSFER_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // 👇 FIXED: Sending OBJECT, not String
 //        TransactionEvent event = new TransactionEvent(
 //                "TRANSFER",
-//                fromAccountId.toString(),
-//                toAccountId.toString(),
+//                fromAccountNumber,
+//                toAccountNumber,
 //                BigDecimal.valueOf(amount),
 //                "SUCCESS"
 //        );

@@ -1,4 +1,3 @@
-
 package com.finvault.transaction_service.repository;
 
 import com.finvault.transaction_service.entity.Transaction;
@@ -7,6 +6,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // Find history for a specific account (either as sender OR receiver)
-    List<Transaction> findByFromAccountIdOrToAccountId(Long fromAccountId, Long toAccountId);
+    // 👇 UPDATED: Searches by the 16-digit string and orders by newest first
+    List<Transaction> findByFromAccountNumberOrToAccountNumberOrderByTimestampDesc(String fromAccountNumber, String toAccountNumber);
 }
