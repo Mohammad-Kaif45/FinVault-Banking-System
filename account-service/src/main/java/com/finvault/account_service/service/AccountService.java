@@ -4,9 +4,9 @@ import com.finvault.account_service.entity.Account;
 import com.finvault.account_service.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Added for safety
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.util.List; // hello
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -15,9 +15,7 @@ public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
 
-    // 1. Create Account
     public Account createAccount(Account account) {
-
         long first15Digits = (long) (Math.random() * 1000000000000000L);
         String sixteenDigitNumber = String.format("%016d", first15Digits);
         account.setAccountNumber(sixteenDigitNumber);
@@ -28,28 +26,23 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    // 2. Get Accounts by User
     public List<Account> getAccountsByUserId(Long userId) {
         return accountRepository.findByUserId(userId);
     }
 
-    // 3. Get Account by ID
     public Account getAccountById(Long id) {
         return accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
-    // 4. Deposit Money
     public Account deposit(Long id, Double amount) {
         Account account = getAccountById(id);
         BigDecimal newBalance = account.getBalance().add(BigDecimal.valueOf(amount));
         account.setBalance(newBalance);
-
-        System.out.println("✅ Deposited ₹" + amount + " to Account ID: " + id); // Localized
+        System.out.println("✅ Deposited ₹" + amount + " to Account ID: " + id);
         return accountRepository.save(account);
     }
 
-    // 5. Withdraw Money
     public Account withdraw(Long id, Double amount) {
         Account account = getAccountById(id);
         BigDecimal currentBalance = account.getBalance();
@@ -60,19 +53,32 @@ public class AccountService {
         }
 
         account.setBalance(currentBalance.subtract(amountToWithdraw));
-        System.out.println("✅ Withdrew ₹" + amount + " from Account ID: " + id); // Localized
+        System.out.println("✅ Withdrew ₹" + amount + " from Account ID: " + id);
         return accountRepository.save(account);
     }
 
-    // --- 👇 NEW: TRANSFER METHOD (Fixes IntelliJ Error) 👇 ---
-    @Transactional // Ensures both accounts update or neither does
-    public void transfer(Long sourceId, Long targetId, Double amount) {
-        // 1. Perform Withdrawal from Source
-        withdraw(sourceId, amount);
+    // 👇 FIXED: This now expects a String targetAccountNumber
+    @Transactional
+    public void transfer(Long sourceId, String targetAccountNumber, Double amount) {
 
-        // 2. Perform Deposit to Target
-        deposit(targetId, amount);
+        Account sourceAccount = getAccountById(sourceId);
 
-        System.out.println("💸 Transfer Complete: ₹" + amount + " from " + sourceId + " to " + targetId);
+        Account targetAccount = accountRepository.findByAccountNumber(targetAccountNumber)
+                .orElseThrow(() -> new RuntimeException("Target account number not found"));
+
+        BigDecimal currentBalance = sourceAccount.getBalance();
+        BigDecimal transferAmount = BigDecimal.valueOf(amount);
+
+        if (currentBalance.compareTo(transferAmount) < 0) {
+            throw new RuntimeException("❌ Insufficient Funds");
+        }
+
+        sourceAccount.setBalance(currentBalance.subtract(transferAmount));
+        targetAccount.setBalance(targetAccount.getBalance().add(transferAmount));
+
+        accountRepository.save(sourceAccount);
+        accountRepository.save(targetAccount);
+
+        System.out.println("💸 Transfer Complete: ₹" + amount + " to Account Number " + targetAccountNumber);
     }
 }

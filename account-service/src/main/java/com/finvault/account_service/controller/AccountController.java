@@ -17,21 +17,14 @@ public class AccountController {
     private AccountService accountService;
 
     // 1. Create Account
-    // URL: POST /accounts/create
     @PostMapping("/create")
     public Account createAccount(@RequestBody Account account) {
         return accountService.createAccount(account);
     }
 
-    // 2. Get Account by ID (With Security Logging)
+    // 2. Get Account by ID
     @GetMapping("/{id}")
-    public Account getAccount(
-            @PathVariable Long id,
-            @RequestHeader(value = "loggedInUser", required = false) String loggedInUser,
-            @RequestHeader(value = "loggedInRole", required = false) String loggedInRole
-    ) {
-        // Log access for audit purposes
-        System.out.println("🚨 Access Request for Account " + id + " by: " + loggedInUser + " | Role: " + loggedInRole);
+    public Account getAccount(@PathVariable Long id) {
         return accountService.getAccountById(id);
     }
 
@@ -42,47 +35,36 @@ public class AccountController {
     }
 
     // 4. Withdraw Money
-    // URL: POST /accounts/{id}/withdraw
     @PostMapping("/{id}/withdraw")
     public ResponseEntity<Account> withdraw(@PathVariable Long id, @RequestBody Map<String, Object> request) {
-        // Bulletproof conversion to handle different numeric formats safely
         Double amount = Double.parseDouble(request.get("amount").toString());
-
         accountService.withdraw(id, amount);
-
-        // Return updated account state for the UI
-        Account updatedAccount = accountService.getAccountById(id);
-        return ResponseEntity.ok(updatedAccount);
+        return ResponseEntity.ok(accountService.getAccountById(id));
     }
 
     // 5. Deposit Money
-    // URL: POST /accounts/{id}/deposit
     @PostMapping("/{id}/deposit")
     public ResponseEntity<Account> deposit(@PathVariable Long id, @RequestBody Map<String, Object> request) {
         Double amount = Double.parseDouble(request.get("amount").toString());
-
         accountService.deposit(id, amount);
-
-        Account updatedAccount = accountService.getAccountById(id);
-        return ResponseEntity.ok(updatedAccount);
+        return ResponseEntity.ok(accountService.getAccountById(id));
     }
 
-    // 6. Transfer Money (UPDATED VERSION)
-    // URL: POST /accounts/{id}/transfer/{targetId}
-    @PostMapping("/{id}/transfer/{targetId}")
+    // --- 👇 CRITICAL FIX: Transfer by Account Number String 👇 ---
+    // URL: POST /accounts/{id}/transfer/{targetAccountNumber}
+    @PostMapping("/{id}/transfer/{targetAccountNumber}")
     public ResponseEntity<Account> transfer(
             @PathVariable Long id,
-            @PathVariable Long targetId,
+            @PathVariable String targetAccountNumber, // 👈 CHANGED: Long to String
             @RequestBody Map<String, Object> request) {
 
-        // Convert amount safely from JSON
+        // Safe conversion of amount
         Double amount = Double.parseDouble(request.get("amount").toString());
 
-        // Perform the transfer logic in the service
-        accountService.transfer(id, targetId, amount);
+        // Call service with the 16-digit target string
+        accountService.transfer(id, targetAccountNumber, amount);
 
-        // Return the source account with the new balance
-        Account updatedSourceAccount = accountService.getAccountById(id);
-        return ResponseEntity.ok(updatedSourceAccount);
+        // Return updated source account
+        return ResponseEntity.ok(accountService.getAccountById(id));
     }
 }
