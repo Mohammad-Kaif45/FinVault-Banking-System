@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.web.client.RestTemplate;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class AccountService {
@@ -58,7 +61,9 @@ public class AccountService {
 
     @Transactional
     public void transfer(Long sourceId, String targetAccountNumber, Double amount) {
+
         Account sourceAccount = getAccountById(sourceId);
+
         Account targetAccount = accountRepository.findByAccountNumber(targetAccountNumber)
                 .orElseThrow(() -> new RuntimeException("Target account number not found"));
 
@@ -69,15 +74,35 @@ public class AccountService {
             throw new RuntimeException("❌ Insufficient Funds");
         }
 
+        // 1. Move the money
         sourceAccount.setBalance(currentBalance.subtract(transferAmount));
         targetAccount.setBalance(targetAccount.getBalance().add(transferAmount));
 
+        // 2. Save the new balances to Account DB
         accountRepository.save(sourceAccount);
         accountRepository.save(targetAccount);
 
         System.out.println("💸 Transfer Complete: ₹" + amount + " to Account Number " + targetAccountNumber);
-    }
 
+        // --- 👇 NEW: Send the receipt to Transaction Service 👇 ---
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Build the JSON receipt
+            Map<String, Object> receipt = new HashMap<>();
+            receipt.put("fromAccountNumber", sourceAccount.getAccountNumber());
+            receipt.put("toAccountNumber", targetAccountNumber);
+            receipt.put("amount", amount);
+            receipt.put("status", "TRANSFER_SUCCESS");
+
+            // Send POST request to Transaction Service (Port 8081)
+            restTemplate.postForObject("http://localhost:8081/transactions/log", receipt, Object.class);
+            System.out.println("✅ Receipt successfully sent to Transaction Ledger!");
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Warning: Money moved, but failed to log transaction. Is Transaction Service running on 8081?");
+        }
+    }
     // --- 👇 NEW: MICROSERVICE LOGIC FOR FEIGN CLIENT 👇 ---
 
     public void depositByNumber(String accountNumber, Double amount) {

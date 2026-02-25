@@ -2,15 +2,37 @@ package com.finvault.transaction_service.controller;
 
 import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.service.TransactionService;
+import com.finvault.transaction_service.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity; // 👈 Added import
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List; // 👈 Added import
 
 @RestController
 @RequestMapping("/transactions")
+@CrossOrigin(origins = "*") // ✅ Perfect, this fixes the CORS block!
 public class TransactionController {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @PostMapping("/log")
+    public void logTransaction(@RequestBody Transaction receipt) {
+        transactionRepository.save(receipt);
+        System.out.println("📝 Ledger Updated: Saved transfer receipt to database!");
+    }
+
+    // --- 👇 CRITICAL ADDITION: The frontend needs this to build the Dashboard table 👇 ---
+    @GetMapping("/history/{accountNumber}")
+    public ResponseEntity<List<Transaction>> getHistory(@PathVariable String accountNumber) {
+        List<Transaction> history = transactionRepository.findByFromAccountNumberOrToAccountNumberOrderByTimestampDesc(accountNumber, accountNumber);
+        return ResponseEntity.ok(history);
+    }
+    // -----------------------------------------------------------------------------------
 
     @PostMapping("/deposit")
     public Transaction deposit(@RequestBody TransactionRequest request) {
@@ -33,7 +55,7 @@ public class TransactionController {
 
     // --- DTOs ---
     public static class TransactionRequest {
-        private String accountNumber; // 👈 Changed to String
+        private String accountNumber;
         private Double amount;
 
         public String getAccountNumber() { return accountNumber; }
@@ -43,8 +65,8 @@ public class TransactionController {
     }
 
     public static class TransferRequest {
-        private String fromAccountNumber;     // 👈 Changed to String
-        private String receiverAccountNumber; // 👈 Changed to String
+        private String fromAccountNumber;
+        private String receiverAccountNumber;
         private Double amount;
 
         public String getFromAccountNumber() { return fromAccountNumber; }
