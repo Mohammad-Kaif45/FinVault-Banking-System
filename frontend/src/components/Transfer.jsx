@@ -18,7 +18,7 @@ function Transfer() {
       const token = localStorage.getItem("token");
 
       // The API call will now properly send /accounts/1/transfer/...
-      await axios.post(`http://localhost:8080/accounts/${id}/transfer/${targetAccountNumber}`,
+      await axios.post(`http://localhost:8085/accounts/${id}/transfer/${targetAccountNumber}`,
         { amount: amount },
         { headers: { Authorization: `Bearer ${token}` } }
       );

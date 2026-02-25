@@ -19,7 +19,7 @@ function Dashboard() {
         if (!token || !userId) { window.location.href = "/login"; return; }
 
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        const response = await axios.get(`http://localhost:8080/accounts/user/${userId}`, config);
+        const response = await axios.get(`http://localhost:8085/accounts/user/${userId}`, config);
 
         if (response.data && response.data.length > 0) {
             setAccount(response.data[0]);
