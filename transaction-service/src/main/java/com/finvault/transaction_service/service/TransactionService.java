@@ -6,7 +6,6 @@ import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.repository.TransactionRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,14 +19,13 @@ public class TransactionService {
     @Autowired
     private AccountClient accountClient;
 
+    // 👇 Inject our new REST client to talk to Notification Service
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
-
-    private static final String TOPIC = "transaction-updates";
+    private NotificationClientService notificationClientService;
 
     // --- 1. DEPOSIT LOGIC ---
     @CircuitBreaker(name = "accountService", fallbackMethod = "depositFallback")
-    public Transaction depositMoney(String accountNumber, Double amount) { // 👈 Changed to String
+    public Transaction depositMoney(String accountNumber, Double amount) {
         accountClient.deposit(accountNumber, amount);
 
         Transaction transaction = new Transaction(
@@ -35,15 +33,15 @@ public class TransactionService {
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // Uncomment for Kafka later
-//        TransactionEvent event = new TransactionEvent(
-//                "DEPOSIT",
-//                null,
-//                accountNumber, // No need for .toString() anymore
-//                BigDecimal.valueOf(amount),
-//                "SUCCESS"
-//        );
-//        kafkaTemplate.send(TOPIC, event);
+        // Send Email Alert
+        TransactionEvent event = new TransactionEvent(
+                "DEPOSIT",
+                null,
+                accountNumber,
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
     }
@@ -55,7 +53,7 @@ public class TransactionService {
 
     // --- 2. WITHDRAW LOGIC ---
     @CircuitBreaker(name = "accountService", fallbackMethod = "withdrawFallback")
-    public Transaction withdrawMoney(String accountNumber, Double amount) { // 👈 Changed to String
+    public Transaction withdrawMoney(String accountNumber, Double amount) {
         accountClient.withdraw(accountNumber, amount);
 
         Transaction transaction = new Transaction(
@@ -63,14 +61,15 @@ public class TransactionService {
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-//        TransactionEvent event = new TransactionEvent(
-//                "WITHDRAW",
-//                accountNumber,
-//                null,
-//                BigDecimal.valueOf(amount),
-//                "SUCCESS"
-//        );
-//        kafkaTemplate.send(TOPIC, event);
+        // Send Email Alert
+        TransactionEvent event = new TransactionEvent(
+                "WITHDRAWAL",
+                accountNumber,
+                null,
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
     }
@@ -80,7 +79,7 @@ public class TransactionService {
     }
 
     // --- 3. TRANSFER LOGIC ---
-    public Transaction transferMoney(String fromAccountNumber, String toAccountNumber, Double amount) { // 👈 Changed to String
+    public Transaction transferMoney(String fromAccountNumber, String toAccountNumber, Double amount) {
         accountClient.withdraw(fromAccountNumber, amount);
         accountClient.deposit(toAccountNumber, amount);
 
@@ -89,14 +88,15 @@ public class TransactionService {
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-//        TransactionEvent event = new TransactionEvent(
-//                "TRANSFER",
-//                fromAccountNumber,
-//                toAccountNumber,
-//                BigDecimal.valueOf(amount),
-//                "SUCCESS"
-//        );
-//        kafkaTemplate.send(TOPIC, event);
+        // Send Email Alert
+        TransactionEvent event = new TransactionEvent(
+                "TRANSFER",
+                fromAccountNumber,
+                toAccountNumber,
+                BigDecimal.valueOf(amount),
+                "SUCCESS"
+        );
+        notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
     }
