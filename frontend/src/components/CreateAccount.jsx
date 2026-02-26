@@ -11,7 +11,7 @@ function CreateAccount() {
     e.preventDefault();
     try {
       const config = { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } };
-      await axios.post("http://localhost:8080/accounts/create", { userId: localStorage.getItem("userId"), ...formData }, config);
+      await axios.post("http://localhost:8085/accounts/create", { userId: localStorage.getItem("userId"), ...formData }, config);
       setShowSuccess(true);
       setTimeout(() => { setShowSuccess(false); navigate("/dashboard"); }, 3000);
     } catch (error) { alert("Creation Failed."); }
