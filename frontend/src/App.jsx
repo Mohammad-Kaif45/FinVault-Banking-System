@@ -5,6 +5,8 @@ import Register from "./components/Register";
 import CreateAccount from "./components/CreateAccount";
 import Withdraw from "./components/Withdraw";
 import Transfer from "./components/Transfer";
+import Deposit from "./components/Deposit";
+import Profile from "./components/Profile";
 function App() {
   return (
     <Router>
@@ -13,19 +15,18 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
 
         {/* The Login Page */}
-        <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/create-account" element={<CreateAccount />} />
 
-        <Route path="/register" element={<Register />} />
+                {/* Transaction Routes */}
+                <Route path="/withdraw/:accountId" element={<Withdraw />} />
+                <Route path="/transfer/:accountId" element={<Transfer />} />
+                <Route path="/deposit/:id" element={<Deposit />} />
 
-        <Route path="/create-account" element={<CreateAccount />} />
-
-        <Route path="/withdraw/:accountId" element={<Withdraw />} />
-        <Route path="/transfer/:accountId" element={<Transfer />} />
-
-
-
-        {/* The Dashboard (We will protect this in Day 4!) */}
-        <Route path="/dashboard" element={<Dashboard />} />
+                {/* Identity & Dashboard */}
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );

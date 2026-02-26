@@ -169,10 +169,12 @@ function Dashboard() {
   return (
     <div style={{ backgroundColor: theme.bg, minHeight: "100vh", fontFamily: "sans-serif", paddingBottom: "60px" }}>
 
+      {/* HEADER WITH PROFILE LINK */}
       <div style={{ backgroundColor: theme.header, color: "white", padding: "0 10%", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: "20px", fontWeight: "600" }}>FinVault <span style={{fontWeight:"300", opacity:0.7}}>Enterprise</span></div>
-        <div style={{ fontSize: "14px" }}>
-            <span style={{marginRight: "20px"}}>{userName}</span>
+        <div style={{ fontSize: "14px", display: "flex", gap: "20px", alignItems: "center" }}>
+            <span style={{fontWeight: "500"}}>{userName}</span>
+            <span style={{color: "#60A5FA", cursor: "pointer", fontWeight: "500"}} onClick={() => window.location.href = "/profile"}>Profile</span>
             <span style={{color: "#9CA3AF", cursor: "pointer"}} onClick={() => { localStorage.clear(); window.location.href = "/login"; }}>Sign Out</span>
         </div>
       </div>
@@ -204,16 +206,29 @@ function Dashboard() {
                 </div>
               </div>
 
+              {/* QUICK ACTIONS CARD WITH DEPOSIT BUTTON */}
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600", marginBottom: "15px"}}>QUICK ACTIONS</div>
+
                 <button
                   style={{ width: "100%", backgroundColor: theme.primary, color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px" }}
                   onClick={() => window.location.href = `/transfer/${account.id}`}
                 >
                   Transfer Funds &rarr;
                 </button>
+
+                {/* NEW: Deposit Button */}
                 <button
-                  style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer" }}
+                  style={{ width: "100%", backgroundColor: "#10B981", color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px", transition: "opacity 0.2s" }}
+                  onClick={() => window.location.href = `/deposit/${account.id}`}
+                  onMouseOver={(e)=>e.target.style.opacity=0.9}
+                  onMouseOut={(e)=>e.target.style.opacity=1}
+                >
+                  Deposit Capital &darr;
+                </button>
+
+                <button
+                  style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }}
                   onClick={() => window.location.href = `/withdraw/${account.id}`}
                 >
                   Withdraw Cash
