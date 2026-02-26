@@ -37,14 +37,31 @@ public class AccountService {
                 .orElseThrow(() -> new RuntimeException("Account not found"));
     }
 
+    // --- 👇 UPDATED: Deposit now saves to the ledger 👇 ---
     public Account deposit(Long id, Double amount) {
         Account account = getAccountById(id);
         BigDecimal newBalance = account.getBalance().add(BigDecimal.valueOf(amount));
         account.setBalance(newBalance);
+        Account savedAccount = accountRepository.save(account);
         System.out.println("✅ Deposited ₹" + amount + " to Account ID: " + id);
-        return accountRepository.save(account);
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> receipt = new HashMap<>();
+            receipt.put("fromAccountNumber", null); // No sender for a deposit
+            receipt.put("toAccountNumber", account.getAccountNumber());
+            receipt.put("amount", amount);
+            receipt.put("status", "DEPOSIT_SUCCESS");
+
+            restTemplate.postForObject("http://localhost:8081/transactions/log", receipt, Object.class);
+        } catch (Exception e) {
+            System.err.println("⚠️ Warning: Failed to log deposit transaction.");
+        }
+
+        return savedAccount;
     }
 
+    // --- 👇 UPDATED: Withdraw now saves to the ledger 👇 ---
     public Account withdraw(Long id, Double amount) {
         Account account = getAccountById(id);
         BigDecimal currentBalance = account.getBalance();
@@ -55,8 +72,24 @@ public class AccountService {
         }
 
         account.setBalance(currentBalance.subtract(amountToWithdraw));
+        Account savedAccount = accountRepository.save(account);
         System.out.println("✅ Withdrew ₹" + amount + " from Account ID: " + id);
-        return accountRepository.save(account);
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> receipt = new HashMap<>();
+            receipt.put("fromAccountNumber", account.getAccountNumber());
+            receipt.put("toAccountNumber", null); // No receiver for a withdrawal
+            receipt.put("amount", amount);
+            receipt.put("status", "WITHDRAW_SUCCESS");
+
+            restTemplate.postForObject("http://localhost:8081/transactions/log", receipt, Object.class);
+            System.out.println("✅ Withdrawal receipt successfully sent to Transaction Ledger!");
+        } catch (Exception e) {
+            System.err.println("⚠️ Warning: Failed to log withdrawal transaction.");
+        }
+
+        return savedAccount;
     }
 
     @Transactional
@@ -74,36 +107,31 @@ public class AccountService {
             throw new RuntimeException("❌ Insufficient Funds");
         }
 
-        // 1. Move the money
         sourceAccount.setBalance(currentBalance.subtract(transferAmount));
         targetAccount.setBalance(targetAccount.getBalance().add(transferAmount));
 
-        // 2. Save the new balances to Account DB
         accountRepository.save(sourceAccount);
         accountRepository.save(targetAccount);
 
         System.out.println("💸 Transfer Complete: ₹" + amount + " to Account Number " + targetAccountNumber);
 
-        // --- 👇 NEW: Send the receipt to Transaction Service 👇 ---
         try {
             RestTemplate restTemplate = new RestTemplate();
-
-            // Build the JSON receipt
             Map<String, Object> receipt = new HashMap<>();
             receipt.put("fromAccountNumber", sourceAccount.getAccountNumber());
             receipt.put("toAccountNumber", targetAccountNumber);
             receipt.put("amount", amount);
             receipt.put("status", "TRANSFER_SUCCESS");
 
-            // Send POST request to Transaction Service (Port 8081)
             restTemplate.postForObject("http://localhost:8081/transactions/log", receipt, Object.class);
-            System.out.println("✅ Receipt successfully sent to Transaction Ledger!");
+            System.out.println("✅ Transfer receipt successfully sent to Transaction Ledger!");
 
         } catch (Exception e) {
             System.err.println("⚠️ Warning: Money moved, but failed to log transaction. Is Transaction Service running on 8081?");
         }
     }
-    // --- 👇 NEW: MICROSERVICE LOGIC FOR FEIGN CLIENT 👇 ---
+
+    // --- MICROSERVICE LOGIC FOR FEIGN CLIENT ---
 
     public void depositByNumber(String accountNumber, Double amount) {
         Account account = accountRepository.findByAccountNumber(accountNumber)

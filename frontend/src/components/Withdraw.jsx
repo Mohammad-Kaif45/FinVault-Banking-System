@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Withdraw() {
-  const { id } = useParams();
   const navigate = useNavigate();
+
+  // 🚀 BULLETPROOF FIX: Forcefully grab the ID directly from the URL
+  const id = window.location.pathname.split("/").pop();
+
   const [amount, setAmount] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -12,8 +15,9 @@ function Withdraw() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      // 👇 Matches the 'Bulletproof' Map<String, Object> backend logic
-      await axios.post(`http://localhost:8080/accounts/${id}/withdraw`,
+
+      // 🚀 PORT FIX: Now pointing to Account Service on 8085
+      await axios.post(`http://localhost:8085/accounts/${id}/withdraw`,
         { amount: amount },
         { headers: { Authorization: `Bearer ${token}` } }
       );

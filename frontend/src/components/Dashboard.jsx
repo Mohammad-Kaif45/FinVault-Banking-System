@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function Dashboard() {
   const [account, setAccount] = useState(null);
@@ -35,7 +37,7 @@ function Dashboard() {
     fetchAccount();
   }, []);
 
-  // 2. Fetch Transaction History (Triggers after account is loaded)
+  // 2. Fetch Transaction History
   useEffect(() => {
     if (account && account.accountNumber) {
       const fetchTransactions = async () => {
@@ -44,7 +46,6 @@ function Dashboard() {
           const token = localStorage.getItem("token");
           const config = { headers: { Authorization: `Bearer ${token}` } };
 
-          // ⚠️ NOTE: Ensure your Transaction Service is running on port 8081!
           const res = await axios.get(`http://localhost:8081/transactions/history/${account.accountNumber}`, config);
           setTransactions(res.data);
         } catch (err) {
@@ -73,8 +74,94 @@ function Dashboard() {
       type,
       counterpart,
       amountPrefix: isOutgoing ? "-" : "+",
-      amountColor: isOutgoing ? theme.textMain : "#10B981" // Green for money coming in
+      amountColor: isOutgoing ? theme.textMain : "#10B981"
     };
+  };
+
+  // --- HELPER TO FIX THE 1970 DATE BUG ---
+  const parseDate = (timestamp) => {
+    if (!timestamp) return new Date();
+    if (Array.isArray(timestamp)) {
+      return new Date(timestamp[0], timestamp[1] - 1, timestamp[2], timestamp[3], timestamp[4], timestamp[5] || 0);
+    }
+    return new Date(timestamp);
+  };
+
+  // --- PROFESSIONAL PDF GENERATION LOGIC ---
+  const downloadStatement = () => {
+    const doc = new jsPDF();
+
+    // 1. Add FinVault Branding Header
+    doc.setFontSize(22);
+    doc.setTextColor(15, 23, 42);
+    doc.text("FINVAULT ENTERPRISE", 14, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(107, 114, 128);
+    doc.text("Official Account Statement", 14, 28);
+
+    // 2. Add Account Summary
+    doc.setFontSize(11);
+    doc.setTextColor(31, 41, 55);
+    doc.text(`Account Holder: ${userName}`, 14, 42);
+    doc.text(`Account Number: ${account.accountNumber}`, 14, 48);
+    doc.text(`Statement Date: ${new Date().toLocaleDateString('en-IN')}`, 14, 54);
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Available Balance: INR ${account.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 14, 62);
+
+    // 3. Format Table Data
+    const tableColumn = ["Date & Time", "Transaction Type", "Counterpart", "Amount (INR)", "Status"];
+    const tableRows = [];
+
+    transactions.forEach(tx => {
+      const { type, counterpart, amountPrefix } = getTxDetails(tx);
+      const txDate = parseDate(tx.timestamp);
+
+      const rowData = [
+        txDate.toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
+        type,
+        counterpart,
+        `${amountPrefix}${tx.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`,
+        tx.status.split('_').pop()
+      ];
+      tableRows.push(rowData);
+    });
+
+    // 4. Render Table with FinVault Theme Colors
+    autoTable(doc, {
+      startY: 70,
+      head: [tableColumn],
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+      alternateRowStyles: { fillColor: [249, 250, 251] },
+      styles: { fontSize: 10, cellPadding: 4 }
+    });
+
+    // 5. Add Watermark and Confidential Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+
+      // FinVault Watermark
+      doc.setFontSize(45);
+      doc.setTextColor(240, 243, 248);
+      doc.text("FINVAULT STATEMENT", 105, 150, { align: "center", angle: 45 });
+
+      // Footer
+      doc.setFontSize(9);
+      doc.setTextColor(156, 163, 175);
+      doc.text(
+        "Confidential - Generated securely by the FinVault Enterprise Banking System.",
+        14,
+        doc.internal.pageSize.height - 10
+      );
+    }
+
+    // 6. Save PDF
+    doc.save(`FinVault_Statement_${account.accountNumber}.pdf`);
   };
 
   if (loading) return <div style={{padding: "50px", fontFamily: "sans-serif"}}>Loading Enterprise Portal...</div>;
@@ -82,7 +169,6 @@ function Dashboard() {
   return (
     <div style={{ backgroundColor: theme.bg, minHeight: "100vh", fontFamily: "sans-serif", paddingBottom: "60px" }}>
 
-      {/* HEADER */}
       <div style={{ backgroundColor: theme.header, color: "white", padding: "0 10%", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: "20px", fontWeight: "600" }}>FinVault <span style={{fontWeight:"300", opacity:0.7}}>Enterprise</span></div>
         <div style={{ fontSize: "14px" }}>
@@ -96,10 +182,7 @@ function Dashboard() {
 
         {account ? (
           <>
-            {/* TOP GRID: BALANCE & ACTIONS */}
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
-
-              {/* BALANCE CARD */}
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
                    <div>
@@ -121,7 +204,6 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* QUICK ACTIONS CARD */}
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600", marginBottom: "15px"}}>QUICK ACTIONS</div>
                 <button
@@ -139,9 +221,18 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* BOTTOM SECTION: TRANSACTION LEDGER */}
             <div style={{ marginTop: "24px", backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
-              <div style={{ fontSize: "16px", fontWeight: "600", color: theme.textMain, marginBottom: "20px" }}>Transaction History</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <div style={{ fontSize: "16px", fontWeight: "600", color: theme.textMain }}>Transaction History</div>
+                <button
+                  onClick={downloadStatement}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "white", border: `1px solid ${theme.border}`, color: theme.textMain, padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "500", transition: "all 0.2s" }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#F9FAFB"}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = "white"}
+                >
+                  📄 Download Statement
+                </button>
+              </div>
 
               {loadingTx ? (
                  <div style={{ color: theme.textSec, fontSize: "14px", padding: "20px 0" }}>Syncing ledger data...</div>
@@ -160,10 +251,12 @@ function Dashboard() {
                     <tbody>
                       {transactions.map((tx) => {
                         const { type, counterpart, amountPrefix, amountColor } = getTxDetails(tx);
+                        const displayDate = parseDate(tx.timestamp);
+
                         return (
                           <tr key={tx.id} style={{ borderBottom: `1px solid ${theme.border}`, fontSize: "14px" }}>
                             <td style={{ padding: "16px 0", color: theme.textSec }}>
-                              {new Date(tx.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                              {displayDate.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                             </td>
                             <td style={{ padding: "16px 0", fontWeight: "500" }}>{type}</td>
                             <td style={{ padding: "16px 0", color: theme.textSec }}>{counterpart}</td>
