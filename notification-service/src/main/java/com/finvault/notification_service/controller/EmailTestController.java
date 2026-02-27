@@ -17,10 +17,11 @@ public class EmailTestController {
     public String sendTestEmail(@RequestParam String to) {
         System.out.println("🔥 Manual Trigger: Sending email to " + to);
 
-        emailService.sendEmail(
+        // 👇 FIX: Calling the new sendHtmlEmail method instead of sendEmail
+        emailService.sendHtmlEmail(
                 to,
                 "FinVault Security Alert 🏦",
-                "Hello! This is a test notification from your FinVault Banking System. Your email logic is working perfectly! ✅"
+                "<h3>Hello!</h3><p>This is a test notification from your FinVault Banking System. Your HTML email logic is working perfectly! ✅</p>"
         );
 
         return "Email sent to " + to + "! Check your inbox.";

@@ -19,7 +19,7 @@ public class TransactionService {
     @Autowired
     private AccountClient accountClient;
 
-    // 👇 Inject our new REST client to talk to Notification Service
+    // 👇 INJECTING THE NOTIFICATION CLIENT
     @Autowired
     private NotificationClientService notificationClientService;
 
@@ -32,22 +32,16 @@ public class TransactionService {
                 null, accountNumber, BigDecimal.valueOf(amount), "DEPOSIT_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
+        System.out.println("📝 Ledger Updated: Saved deposit receipt to database!");
 
-        // Send Email Alert
-        TransactionEvent event = new TransactionEvent(
-                "DEPOSIT",
-                null,
-                accountNumber,
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
+        // 👇 TRIGGERING THE EMAIL
+        TransactionEvent event = new TransactionEvent("DEPOSIT", null, accountNumber, BigDecimal.valueOf(amount), "SUCCESS");
         notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
     }
 
     public Transaction depositFallback(String accountNumber, Double amount, Throwable t) {
-        System.err.println("Fallback executed: " + t.getMessage());
         return transactionRepository.save(new Transaction(null, accountNumber, BigDecimal.valueOf(amount), "FAILED"));
     }
 
@@ -60,15 +54,10 @@ public class TransactionService {
                 accountNumber, null, BigDecimal.valueOf(amount), "WITHDRAW_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
+        System.out.println("📝 Ledger Updated: Saved withdrawal receipt to database!");
 
-        // Send Email Alert
-        TransactionEvent event = new TransactionEvent(
-                "WITHDRAWAL",
-                accountNumber,
-                null,
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
+        // 👇 TRIGGERING THE EMAIL
+        TransactionEvent event = new TransactionEvent("WITHDRAWAL", accountNumber, null, BigDecimal.valueOf(amount), "SUCCESS");
         notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
@@ -87,15 +76,10 @@ public class TransactionService {
                 fromAccountNumber, toAccountNumber, BigDecimal.valueOf(amount), "TRANSFER_SUCCESS"
         );
         Transaction savedTransaction = transactionRepository.save(transaction);
+        System.out.println("📝 Ledger Updated: Saved transfer receipt to database!");
 
-        // Send Email Alert
-        TransactionEvent event = new TransactionEvent(
-                "TRANSFER",
-                fromAccountNumber,
-                toAccountNumber,
-                BigDecimal.valueOf(amount),
-                "SUCCESS"
-        );
+        // 👇 TRIGGERING THE EMAIL
+        TransactionEvent event = new TransactionEvent("TRANSFER", fromAccountNumber, toAccountNumber, BigDecimal.valueOf(amount), "SUCCESS");
         notificationClientService.sendTransactionAlert(event);
 
         return savedTransaction;
