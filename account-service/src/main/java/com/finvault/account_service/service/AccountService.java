@@ -155,4 +155,10 @@ public class AccountService {
         accountRepository.save(account);
         System.out.println("✅ Feign Withdraw: ₹" + amount + " from " + accountNumber);
     }
+    // 👇 NEW: Admin toggle freeze status
+    public Account toggleFreeze(Long id) {
+        Account account = getAccountById(id);
+        account.setFrozen(!account.isFrozen()); // Flips true to false, or false to true
+        return accountRepository.save(account);
+    }
 }

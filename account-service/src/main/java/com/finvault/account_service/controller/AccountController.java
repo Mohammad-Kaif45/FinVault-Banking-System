@@ -109,4 +109,10 @@ public class AccountController {
         List<Account> allAccounts = accountRepository.findAll();
         return ResponseEntity.ok(allAccounts);
     }
+    // --- 👇 NEW: ADMIN FREEZE ENDPOINT 👇 ---
+    @PutMapping("/admin/{id}/freeze")
+    public ResponseEntity<Account> toggleFreeze(@PathVariable Long id) {
+        System.out.println("⚠️ ADMIN ACTION: Toggling freeze status for Account ID: " + id);
+        return ResponseEntity.ok(accountService.toggleFreeze(id));
+    }
 }
