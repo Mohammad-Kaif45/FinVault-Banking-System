@@ -8,7 +8,7 @@ import Transfer from "./components/Transfer";
 import Deposit from "./components/Deposit";
 import Profile from "./components/Profile";
 import AdminDashboard from './components/AdminDashboard';
-
+import AdminRoute from './components/AdminRoute';
 function App() {
   return (
     <Router>
@@ -31,6 +31,14 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
 
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route
+                        path="/admin"
+                        element={
+                            <AdminRoute>
+                                <AdminDashboard />
+                            </AdminRoute>
+                        }
+                    />
       </Routes>
     </Router>
   );
