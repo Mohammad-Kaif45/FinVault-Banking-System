@@ -2,6 +2,7 @@ package com.finvault.account_service.controller;
 
 import com.finvault.account_service.entity.Account;
 import com.finvault.account_service.service.AccountService;
+import com.finvault.account_service.repository.AccountRepository; // 👈 Added import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +12,15 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/accounts")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173") // Your React Vite port!
 public class AccountController {
 
     @Autowired
     private AccountService accountService;
+
+    // 👇 Added repository to quickly fetch all accounts for the Admin
+    @Autowired
+    private AccountRepository accountRepository;
 
     // 1. Create Account
     @PostMapping("/create")
@@ -84,7 +89,7 @@ public class AccountController {
         }
     }
 
-    // --- 👇 NEW: MICROSERVICE FEIGN ENDPOINTS 👇 ---
+    // --- 👇 MICROSERVICE FEIGN ENDPOINTS 👇 ---
     // These listen for the Transaction Service's requests using the 16-digit strings
 
     @PostMapping("/feign/deposit")
@@ -95,5 +100,13 @@ public class AccountController {
     @PostMapping("/feign/withdraw")
     public void feignWithdraw(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") Double amount) {
         accountService.withdrawByNumber(accountNumber, amount);
+    }
+
+    // --- 👇 NEW: ADMIN DASHBOARD ENDPOINT 👇 ---
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Account>> getAllAccounts() {
+        System.out.println("🛡️ ADMIN ACCESS: Fetching all bank accounts...");
+        List<Account> allAccounts = accountRepository.findAll();
+        return ResponseEntity.ok(allAccounts);
     }
 }

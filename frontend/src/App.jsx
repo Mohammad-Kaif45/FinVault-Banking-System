@@ -7,6 +7,8 @@ import Withdraw from "./components/Withdraw";
 import Transfer from "./components/Transfer";
 import Deposit from "./components/Deposit";
 import Profile from "./components/Profile";
+import AdminDashboard from './components/AdminDashboard';
+
 function App() {
   return (
     <Router>
@@ -27,6 +29,8 @@ function App() {
                 {/* Identity & Dashboard */}
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+
+                <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
