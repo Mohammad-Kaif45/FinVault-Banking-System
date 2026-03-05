@@ -10,6 +10,7 @@ public class NotificationServiceApplication {
    // Notification Service application
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(NotificationServiceApplication.class, args);
 	}
 }
