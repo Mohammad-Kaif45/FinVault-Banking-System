@@ -37,6 +37,7 @@ public class Account {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
+    // Get account number
     public String getAccountNumber() { return accountNumber; }
     public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
