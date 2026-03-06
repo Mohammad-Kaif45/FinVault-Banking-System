@@ -12,7 +12,7 @@ public class Account {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String accountNumber;
+    private String accountNumber; // account number
 
     @Column(nullable = false)
     private String accountType; // "SAVINGS" or "CURRENT"
