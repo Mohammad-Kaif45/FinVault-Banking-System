@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+
+
 @RestController
 @RequestMapping("/accounts")
-@CrossOrigin(origins = "http://localhost:5173") // Your React Vite port!
+@CrossOrigin(origins = "http://localhost:5174") // Your React Vite port!
 public class AccountController {
 
     @Autowired

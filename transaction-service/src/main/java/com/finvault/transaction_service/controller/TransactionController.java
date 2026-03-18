@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/transactions")
-@CrossOrigin(origins = "*") // ✅ Perfect, this fixes the CORS block!
+@CrossOrigin(origins = "http://localhost:5174")// ✅ Perfect, this fixes the CORS block!
 public class TransactionController {
 
     @Autowired

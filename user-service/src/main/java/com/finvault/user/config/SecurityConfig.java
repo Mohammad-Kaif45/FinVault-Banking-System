@@ -48,7 +48,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // 👈 ADDED: Tells Spring Security to use the CORS rules below!
+                .cors(Customizer.withDefaults()) // Tells Spring Security to use the CORS rules below
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Allow Registration & Login without a token
@@ -60,13 +60,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 👇 ADDED: The Bulletproof CORS Configuration for Spring Security 👇
+    // 5. The Bulletproof CORS Configuration for Spring Security
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Explicitly allow your React frontend
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // 👇 UPDATED: Explicitly allow port 5174 (Your active React frontend)
+        configuration.setAllowedOrigins(List.of("http://localhost:5174"));
+
         // Allow all standard HTTP methods
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // Allow all headers
