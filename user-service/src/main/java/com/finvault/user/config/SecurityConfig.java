@@ -45,6 +45,7 @@ public class SecurityConfig {
     }
 
     // 4. Security Filter Chain (The Rules)
+    // security filter chain
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
