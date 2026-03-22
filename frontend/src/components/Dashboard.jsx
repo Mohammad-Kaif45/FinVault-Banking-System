@@ -184,6 +184,7 @@ function Dashboard() {
 
         {account ? (
           <>
+
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
