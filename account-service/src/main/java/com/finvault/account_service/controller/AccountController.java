@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/accounts")
-@CrossOrigin(origins = "http://localhost:5174") // Your React Vite port!
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 public class AccountController {
 
     @Autowired
