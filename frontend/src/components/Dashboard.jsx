@@ -58,7 +58,7 @@ function Dashboard() {
     }
   }, [account]);
 
-  // --- CORPORATE STYLES ---
+  // --- CORPORATE STYLES (PURE INLINE) ---
   const theme = { bg: "#F3F4F6", header: "#111827", cardBg: "#FFFFFF", primary: "#2563EB", textMain: "#1F2937", textSec: "#6B7280", border: "#E5E7EB" };
 
   // --- HELPER TO FORMAT TRANSACTIONS ---
@@ -90,35 +90,25 @@ function Dashboard() {
   // --- PROFESSIONAL PDF GENERATION LOGIC ---
   const downloadStatement = () => {
     const doc = new jsPDF();
-
-    // 1. Add FinVault Branding Header
     doc.setFontSize(22);
     doc.setTextColor(15, 23, 42);
     doc.text("FINVAULT ENTERPRISE", 14, 20);
-
     doc.setFontSize(12);
     doc.setTextColor(107, 114, 128);
     doc.text("Official Account Statement", 14, 28);
-
-    // 2. Add Account Summary
     doc.setFontSize(11);
     doc.setTextColor(31, 41, 55);
     doc.text(`Account Holder: ${userName}`, 14, 42);
     doc.text(`Account Number: ${account.accountNumber}`, 14, 48);
     doc.text(`Statement Date: ${new Date().toLocaleDateString('en-IN')}`, 14, 54);
-
     doc.setFontSize(12);
     doc.setFont(undefined, 'bold');
     doc.text(`Available Balance: INR ${account.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 14, 62);
-
-    // 3. Format Table Data
     const tableColumn = ["Date & Time", "Transaction Type", "Counterpart", "Amount (INR)", "Status"];
     const tableRows = [];
-
     transactions.forEach(tx => {
       const { type, counterpart, amountPrefix } = getTxDetails(tx);
       const txDate = parseDate(tx.timestamp);
-
       const rowData = [
         txDate.toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }),
         type,
@@ -128,8 +118,6 @@ function Dashboard() {
       ];
       tableRows.push(rowData);
     });
-
-    // 4. Render Table with FinVault Theme Colors
     autoTable(doc, {
       startY: 70,
       head: [tableColumn],
@@ -139,28 +127,16 @@ function Dashboard() {
       alternateRowStyles: { fillColor: [249, 250, 251] },
       styles: { fontSize: 10, cellPadding: 4 }
     });
-
-    // 5. Add Watermark and Confidential Footer
     const pageCount = doc.internal.getNumberOfPages();
     for(let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-
-      // FinVault Watermark
       doc.setFontSize(45);
       doc.setTextColor(240, 243, 248);
       doc.text("FINVAULT STATEMENT", 105, 150, { align: "center", angle: 45 });
-
-      // Footer
       doc.setFontSize(9);
       doc.setTextColor(156, 163, 175);
-      doc.text(
-        "Confidential - Generated securely by the FinVault Enterprise Banking System.",
-        14,
-        doc.internal.pageSize.height - 10
-      );
+      doc.text("Confidential - Generated securely by the FinVault Enterprise Banking System.", 14, doc.internal.pageSize.height - 10);
     }
-
-    // 6. Save PDF
     doc.save(`FinVault_Statement_${account.accountNumber}.pdf`);
   };
 
@@ -168,8 +144,7 @@ function Dashboard() {
 
   return (
     <div style={{ backgroundColor: theme.bg, minHeight: "100vh", fontFamily: "sans-serif", paddingBottom: "60px" }}>
-
-      {/* HEADER WITH PROFILE LINK */}
+      {/* HEADER */}
       <div style={{ backgroundColor: theme.header, color: "white", padding: "0 10%", height: "60px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontSize: "20px", fontWeight: "600" }}>FinVault <span style={{fontWeight:"300", opacity:0.7}}>Enterprise</span></div>
         <div style={{ fontSize: "14px", display: "flex", gap: "20px", alignItems: "center" }}>
@@ -184,7 +159,6 @@ function Dashboard() {
 
         {account ? (
           <>
-
             <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{display: "flex", justifyContent: "space-between", marginBottom: "20px"}}>
@@ -194,7 +168,6 @@ function Dashboard() {
                    </div>
                    <span style={{backgroundColor: "#DEF7EC", color: "#03543F", padding: "4px 8px", borderRadius: "4px", fontSize: "12px", fontWeight: "600", height: "fit-content"}}>ACTIVE</span>
                 </div>
-
                 <div style={{borderTop: `1px solid ${theme.border}`, paddingTop: "20px", display: "flex", gap: "40px"}}>
                     <div>
                       <div style={{fontSize: "13px", color: theme.textSec}}>Account Number</div>
@@ -206,50 +179,20 @@ function Dashboard() {
                     </div>
                 </div>
               </div>
-
-              {/* QUICK ACTIONS CARD WITH DEPOSIT BUTTON */}
+              {/* QUICK ACTIONS */}
               <div style={{ backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
                 <div style={{fontSize: "12px", color: theme.textSec, fontWeight: "600", marginBottom: "15px"}}>QUICK ACTIONS</div>
-
-                <button
-                  style={{ width: "100%", backgroundColor: theme.primary, color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px" }}
-                  onClick={() => window.location.href = `/transfer/${account.id}`}
-                >
-                  Transfer Funds &rarr;
-                </button>
-
-                {/* NEW: Deposit Button */}
-                <button
-                  style={{ width: "100%", backgroundColor: "#10B981", color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px", transition: "opacity 0.2s" }}
-                  onClick={() => window.location.href = `/deposit/${account.id}`}
-                  onMouseOver={(e)=>e.target.style.opacity=0.9}
-                  onMouseOut={(e)=>e.target.style.opacity=1}
-                >
-                  Deposit Capital &darr;
-                </button>
-
-                <button
-                  style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }}
-                  onClick={() => window.location.href = `/withdraw/${account.id}`}
-                >
-                  Withdraw Cash
-                </button>
+                <button style={{ width: "100%", backgroundColor: theme.primary, color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px" }} onClick={() => window.location.href = `/transfer/${account.id}`}>Transfer Funds &rarr;</button>
+                <button style={{ width: "100%", backgroundColor: "#10B981", color: "white", padding: "12px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: "600", marginBottom: "10px", transition: "opacity 0.2s" }} onClick={() => window.location.href = `/deposit/${account.id}`}>Deposit Capital &darr;</button>
+                <button style={{ width: "100%", backgroundColor: "white", border: `1px solid ${theme.primary}`, color: theme.primary, padding: "12px", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }} onClick={() => window.location.href = `/withdraw/${account.id}`}>Withdraw Cash</button>
               </div>
             </div>
-
+            {/* TRANSACTION HISTORY TABLE */}
             <div style={{ marginTop: "24px", backgroundColor: theme.cardBg, borderRadius: "8px", border: `1px solid ${theme.border}`, padding: "24px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <div style={{ fontSize: "16px", fontWeight: "600", color: theme.textMain }}>Transaction History</div>
-                <button
-                  onClick={downloadStatement}
-                  style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "white", border: `1px solid ${theme.border}`, color: theme.textMain, padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "500", transition: "all 0.2s" }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#F9FAFB"}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = "white"}
-                >
-                  📄 Download Statement
-                </button>
+                <button onClick={downloadStatement} style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "white", border: `1px solid ${theme.border}`, color: theme.textMain, padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "500" }}>📄 Download Statement</button>
               </div>
-
               {loadingTx ? (
                  <div style={{ color: theme.textSec, fontSize: "14px", padding: "20px 0" }}>Syncing ledger data...</div>
               ) : transactions.length > 0 ? (
@@ -268,25 +211,14 @@ function Dashboard() {
                       {transactions.map((tx) => {
                         const { type, counterpart, amountPrefix, amountColor } = getTxDetails(tx);
                         const displayDate = parseDate(tx.timestamp);
-
                         return (
                           <tr key={tx.id} style={{ borderBottom: `1px solid ${theme.border}`, fontSize: "14px" }}>
-                            <td style={{ padding: "16px 0", color: theme.textSec }}>
-                              {displayDate.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                            </td>
+                            <td style={{ padding: "16px 0", color: theme.textSec }}>{displayDate.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</td>
                             <td style={{ padding: "16px 0", fontWeight: "500" }}>{type}</td>
                             <td style={{ padding: "16px 0", color: theme.textSec }}>{counterpart}</td>
-                            <td style={{ padding: "16px 0", fontWeight: "600", color: amountColor, textAlign: "right" }}>
-                              {amountPrefix}₹{tx.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
-                            </td>
+                            <td style={{ padding: "16px 0", fontWeight: "600", color: amountColor, textAlign: "right" }}>{amountPrefix}₹{tx.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
                             <td style={{ padding: "16px 0", textAlign: "center" }}>
-                              <span style={{
-                                backgroundColor: tx.status.includes("SUCCESS") ? "#DEF7EC" : "#FDE8E8",
-                                color: tx.status.includes("SUCCESS") ? "#03543F" : "#9B1C1C",
-                                padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "600"
-                              }}>
-                                {tx.status.split('_').pop()}
-                              </span>
+                              <span style={{ backgroundColor: tx.status.includes("SUCCESS") ? "#DEF7EC" : "#FDE8E8", color: tx.status.includes("SUCCESS") ? "#03543F" : "#9B1C1C", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "600" }}>{tx.status.split('_').pop()}</span>
                             </td>
                           </tr>
                         );
@@ -294,11 +226,7 @@ function Dashboard() {
                     </tbody>
                   </table>
                 </div>
-              ) : (
-                <div style={{ textAlign: "center", padding: "40px", color: theme.textSec, fontSize: "14px" }}>
-                  No transactions found for this account.
-                </div>
-              )}
+              ) : ( <div style={{ textAlign: "center", padding: "40px", color: theme.textSec, fontSize: "14px" }}>No transactions found.</div> )}
             </div>
           </>
         ) : (
