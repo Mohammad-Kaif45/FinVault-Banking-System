@@ -8,8 +8,8 @@
 
 > A highly scalable, distributed digital banking platform built with a microservices architecture. FinVault provides secure user authentication, real-time transaction processing, interactive virtual cards, and automated statement generation.
 
-![FinVault Hero Banner](docs/hero-image-placeholder.png)  
-*(Replace this text with a link to your main dashboard screenshot. Recommendation: 1200x600px)*
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2c89db89-60a1-4139-8c39-5b13782c3782" />
+
 
 ---
 
@@ -43,8 +43,7 @@
 
 ## 🏗️ System Architecture
 
-![Microservices Architecture Diagram](docs/architecture-placeholder.png)  
-*(Replace this with a diagram showing your API Gateway routing to User, Account, and Transaction services)*
+
 
 The backend operates on a strict microservices design pattern:
 1. **Service Registry (`port 8761`):** Netflix Eureka server tracking all live instances.
@@ -59,8 +58,10 @@ The backend operates on a strict microservices design pattern:
 
 | User Dashboard | Interactive Virtual Card |
 | :---: | :---: |
-| ![Dashboard](docs/dashboard-placeholder.png) | ![Virtual Card](docs/card-placeholder.png) |
-| *Real-time balance, quick actions, and transaction history.* | *3D flipping virtual debit/credit cards.* |
+| <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e4b44b86-044f-40d9-8491-16272ae51c07" />
+ |
+| <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/13b1e36d-9d13-4492-840b-73a436b0191e" />
+ |
 
 | Security & Profile | PDF Statement Generation |
 | :---: | :---: |
