@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const VirtualCard = ({ account, cardType, themeBg, network }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+    const [isFlipped, setIsFlipped] = useState(false);
 
   const cardNumber = account?.accountNumber ? account.accountNumber.substring(0, 16) : "4532124589003214";
   const cvv = cardType === "DEBIT" ? "842" : "109";
