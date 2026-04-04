@@ -150,7 +150,11 @@ function Dashboard() {
         <div style={{ fontSize: "14px", display: "flex", gap: "20px", alignItems: "center" }}>
             <span style={{fontWeight: "500"}}>{userName}</span>
             <span style={{color: "#60A5FA", cursor: "pointer", fontWeight: "500"}} onClick={() => window.location.href = "/profile"}>Profile</span>
-            <span style={{color: "#9CA3AF", cursor: "pointer"}} onClick={() => { localStorage.clear(); window.location.href = "/login"; }}>Sign Out</span>
+
+            {/* 👇 THIS IS THE LINE THAT WAS CHANGED 👇 */}
+            <span style={{color: "#9CA3AF", cursor: "pointer"}} onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("userId"); window.location.href = "/login"; }}>Sign Out</span>
+            {/* 👆 --------------------------------- 👆 */}
+
         </div>
       </div>
 
