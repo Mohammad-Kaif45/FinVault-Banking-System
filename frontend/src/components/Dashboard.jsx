@@ -140,6 +140,14 @@ function Dashboard() {
     doc.save(`FinVault_Statement_${account.accountNumber}.pdf`);
   };
 
+  // --- DYNAMIC GREETING LOGIC ---
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   if (loading) return <div style={{padding: "50px", fontFamily: "sans-serif"}}>Loading Enterprise Portal...</div>;
 
   return (
@@ -151,15 +159,19 @@ function Dashboard() {
             <span style={{fontWeight: "500"}}>{userName}</span>
             <span style={{color: "#60A5FA", cursor: "pointer", fontWeight: "500"}} onClick={() => window.location.href = "/profile"}>Profile</span>
 
-            {/* 👇 THIS IS THE LINE THAT WAS CHANGED 👇 */}
             <span style={{color: "#9CA3AF", cursor: "pointer"}} onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("userId"); window.location.href = "/login"; }}>Sign Out</span>
-            {/* 👆 --------------------------------- 👆 */}
 
         </div>
       </div>
 
       <div style={{ padding: "40px 10%", maxWidth: "1200px", margin: "0 auto" }}>
-        <h1 style={{ fontSize: "24px", fontWeight: "500", marginBottom: "20px", color: theme.textMain }}>Account Overview</h1>
+
+        {/* 👇 UPDATED DYNAMIC GREETING HEADER 👇 */}
+        <h1 style={{ fontSize: "24px", fontWeight: "500", marginBottom: "24px", color: theme.textMain }}>
+          {getGreeting()}, {userName.split(' ')[0]}
+          <span style={{display: 'block', fontSize: '14px', color: theme.textSec, marginTop: '6px', fontWeight: "400"}}>Here is your financial summary.</span>
+        </h1>
+        {/* 👆 --------------------------------- 👆 */}
 
         {account ? (
           <>
