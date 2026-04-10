@@ -11,6 +11,7 @@ function Deposit() {
   const [amount, setAmount] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // handleDeposite
   const handleDeposit = async (e) => {
     e.preventDefault();
     try {
