@@ -11,7 +11,6 @@ public class NotificationServiceApplication {
 	// MAIN MEHTOD
 
 	public static void main(String[] args) {
-        //
 		SpringApplication.run(NotificationServiceApplication.class, args);
 	}
 }
