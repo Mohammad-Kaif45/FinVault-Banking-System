@@ -5,7 +5,7 @@ import com.finvault.transaction_service.entity.Transaction;
 import com.finvault.transaction_service.service.NotificationClientService;
 import com.finvault.transaction_service.service.TransactionService;
 import com.finvault.transaction_service.repository.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired; // autowired
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
