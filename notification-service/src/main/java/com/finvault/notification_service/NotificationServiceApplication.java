@@ -8,9 +8,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 public class NotificationServiceApplication {
    // Notification Service application
-	// MAIN MEHTOD is the
-
 	public static void main(String[] args) {
 		SpringApplication.run(NotificationServiceApplication.class, args);
+		// APP
 	}
 }
