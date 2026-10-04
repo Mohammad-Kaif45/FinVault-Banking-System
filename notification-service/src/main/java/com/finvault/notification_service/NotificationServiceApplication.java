@@ -9,6 +9,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 public class NotificationServiceApplication {
    // Notification Service application
 	public static void main(String[] args) {
-		SpringApplication.run(NotificationServiceApplication.class, args); // spring
+		SpringApplication.run(NotificationServiceApplication.class, args);
 	}
 }
